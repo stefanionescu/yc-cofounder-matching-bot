@@ -19,6 +19,7 @@ class Scout():
         self.contacted_founders = 0
         self.skipped_founders = 0
         self.saved_founders = 0
+        self.skipped_cities = 0
         self.saved_founder_profiles = []
         self.contacted_founders_profiles = []
 
@@ -46,20 +47,31 @@ class Scout():
     def can_form_group(group, category_set):
         return all(item in category_set for item in group)
 
-    def search_profiles(self):
+    def search_profiles(self, city):
+        # If not on discover page, try to go. If cannot go, return and skip city
+        # While time did not elapse and while there are still profiles to see in the current city, loop through profiles
+        # See if we need to check if they are yc alum. If we check and they are, skip. If we check and they aren't, continue
+        # Get profile data
+        # Check if your preferences match. If not, skip. If yes, continue
+        # See if we need to get GPT's opinion. Depending on opinion, decide if we skip or continue
+        # See if we message or save and proceed accordingly
+        # Append data about which founders were skipped, saved and messaged
+
+
+        # Return True when we don't have any more profiles to see
+
         pass
 
     def change_cities_and_search_profiles(self):
         for city in self.cities:
             if not self.my_profile.go_to_profile_and_change_city(city):
+                self.skipped_cities += 1
                 next
             
-            if not self.go_to_discover():
+            search_result = self.search_profiles(city)
+            if not search_result: 
                 # TODO: log to email
-                return
-            
-            search_result = self.search_profiles()
-            if not search_result: break
+                break
             
     def go_to_discover(self):
         discover = self.driver.find_elements(By.XPATH, CONSTANTS.DASHBOARD_DISCOVER_MENU_OPTION)
@@ -67,7 +79,6 @@ class Scout():
             discover[0].click()
             utils.random_long_sleep()
             return self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL)
-        print("Discover Profiles button is not found or multiple instances found.")
         return False
 
     def is_yc_alumn(self):
