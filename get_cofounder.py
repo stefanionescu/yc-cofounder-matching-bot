@@ -72,19 +72,22 @@ def check_general_vars():
     """
     Validate general bot settings from environment variables.
     """
-    max_runtime = os.getenv("BOT_MAX_RUN_TIME")
+    max_runtime = os.getenv("BOT_MAX_RUN_TIME", 1)
     use_gpt = os.getenv("ANALYZE_PROFILES_WITH_GPT", "false").lower() == "true"
-    gpt_key = os.getenv("CHAT_GPT_API_KEY")
+    gpt_key = os.getenv("CHAT_GPT_API_KEY", "")
+    gpt_org = os.getenv("CHAT_GPT_ORGANIZATION", "")
+    gpt_project_id = os.getenv("CHAT_GPT_PROJECT_ID", "")
     city_to_return_to = os.getenv("CITY_TO_RETURN_TO", "")
     contact_founders = os.getenv("CONTACT_FOUNDERS", "false").lower() == "true"
-    max_founders_to_contact = os.getenv("MAX_FOUNDERS_TO_CONTACT")
+    max_founders_to_contact = os.getenv("MAX_FOUNDERS_TO_CONTACT", 0)
     shared_interests = os.getenv("IMPORTANT_SHARED_INTERESTS", "").split(";")
+
 
     if city_to_return_to == "" or len(city_to_return_to) <= 2:
         return False
     if not max_runtime or not 600 <= int(max_runtime) <= 1500:
         return False
-    if use_gpt and (not gpt_key or gpt_key == ""):
+    if use_gpt and (not gpt_key or gpt_key != "") and (not gpt_org or gpt_org != "") and (not gpt_project_id or gpt_project_id != ""):
         return False
     if contact_founders and not 0 < int(max_founders_to_contact) or contact_founders and len(founder_messages) == 0:
         return False

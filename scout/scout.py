@@ -1,10 +1,9 @@
 import os
-import sys
 from time import time
+from openai import OpenAI
 from bs4 import BeautifulSoup
 import constants as CONSTANTS
 from dotenv import load_dotenv
-from selenium import webdriver
 from utils.utils import Utils as utils
 from selenium.webdriver.common.by import By
 from my_profile.my_profile import MyProfile
@@ -86,11 +85,88 @@ class Scout():
         return -1
 
     def get_profile_info(self):
-        # TODO: make sure the array of shared interests is converted into a set
-        pass
-
+        profile_info = {}
+        # Get intro
+        profile_info.intro = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_INTRO).text.rstrip()
+        # Get life story
+        profile_info.life_story = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_LIFE_STORY).text.rstrip()
+        # Get free time
+        profile_info.free_time = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_FREE_TIME).text.rstrip()
+        # Get other info
+        profile_info.other = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_OTHER_INFO).text.rstrip()
+        # Get equity expectations
+        profile_info.equity_expectations = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_EQUITY_EXPECTATIONS).text.rstrip()
+        # Get impressive accomplishments
+        profile_info.accomplishments = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_IMPRESSIVE_ACCOMPLISHMENT).text.rstrip()
+        # Get potential ideas
+        profile_info.potential_ideas = ""
+        potential_ideas = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.FOUNDER_POTENTIAL_IDEAS)
+        if potential_ideas is not None and len(potential_ideas) == 1:
+            profile_info.potential_ideas = potential_ideas[0].text.rstrip()
+        # Get shared interests
+        profile_info.shared_interests = set()
+        shared_interests_span = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_SHARED_INTERESTS_SPAN).find_elements(By.TAG_NAME, "div")
+        interests_array = []
+        for interest in shared_interests_span:
+            interests_array.append(interest.text)
+        if len(interests_array) > 0:
+            profile_info.shared_interests = set(interests_array)
+        return profile_info
+            
     def analyze_with_gpt(self, profile_info):
-        pass
+        if profile_info is None: 
+            # TODO: log to email
+            return (False, None)
+
+        gpt = OpenAI(
+            organization= os.getenv("CHAT_GPT_ORGANIZATION"),
+            project=os.getenv("CHAT_GPT_API_KEY")
+        )
+
+        prompt_text = self.generate_gpt_prompt(profile_info)
+        if prompt_text is None or prompt_text == "": return (CONSTANTS.GPT_PROMPT_CREATION_FAILED, True)
+
+        try:
+            gpt_response = gpt.chat.completions.create(
+                model=CONSTANTS.GPT_MODEL,
+                messages=[
+                    {"role": "system", "content": CONSTANTS.CHAT_GPT_SYSTEM_PERSONA},
+                    {"role": "user", "content": prompt_text}
+                ],
+                max_tokens=CONSTANTS.GPT_MAX_TOKENS,
+                temperature=CONSTANTS.GPT_TEMPERATURE
+            )
+
+            if 'choices' not in gpt_response or gpt_response['choices'] is None:
+                # TODO: log to email
+                return (CONSTANTS.NO_ANSWER_FROM_GPT, True)
+            
+            gpt_likes_founder = False
+            if CONSTANTS.GPT_ANSWER_PASS in gpt_response.choices[0].message:
+                gpt_likes_founder = True
+            
+            return ("", gpt_likes_founder)
+        except Exception as e:
+            # TODO: log to email
+            return (CONSTANTS.CANNOT_CALL_GPT, True)
+
+    def generate_gpt_prompt(self, profile_info):
+        gpt_prompt = CONSTANTS.CHAT_GPT_PROMPT_ONE.format(founder_intro=profile_info.intro) + \
+                     " " + \
+                     CONSTANTS.CHAT_GPT_PROMPT_TWO.format(free_time=profile_info.life_story) + \
+                     " " + \
+                     CONSTANTS.CHAT_GPT_PROMPT_THREE.format(other_info=profile_info.free_time) + \
+                     " " + \
+                     CONSTANTS.CHAT_GPT_PROMPT_FOUR.format(impressive_accomplishment=profile_info.other) + \
+                     " " + \
+                     CONSTANTS.CHAT_GPR_PROMPT_FIVE.format(impressive_accomplishment=profile_info.accomplishments) + \
+                     " " + \
+                     CONSTANTS.CHAT_GPT_PROMPT_SIX.format(potential_ideas=profile_info.potential_ideas) + \
+                     " " + \
+                     CONSTANTS.PROMPT_ENDING
+        
+        return gpt_prompt
+
 
     def contact_founder(self, interest_group):
         if self.contact_founders.lower() != "true": return
@@ -133,11 +209,7 @@ class Scout():
         return True
 
     def go_back_to_preferred_city(self):
-        if not self.my_profile.go_to_profile_and_change_city(self.city_to_return_to):
-            # TODO: log to email
-            return False
-        
-        return True
+        return self.my_profile.go_to_profile_and_change_city(self.city_to_return_to)
 
     def find_cofounders(self):
         try:

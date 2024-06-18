@@ -22,6 +22,7 @@ FOUNDER_SHARED_INTERESTS_SPAN = "//span[text()='Our shared interests']/following
 FOUNDER_IMPRESSIVE_ACCOMPLISHMENT = "//span[text()='Impressive accomplishment']/following-sibling::div[1]"
 FOUNDER_EQUITY_EXPECTATIONS = "//span[text()='Equity expectations']/following-sibling::div[1]"
 FOUNDER_INTRO = "//span[text()='Intro']/following-sibling::div[1]"
+FOUNDER_LIFE_STORY = "//span[text()='Life Story']/following-sibling::div[1]"
 FOUNDER_FREE_TIME = "//span[text()='Free Time']/following-sibling::div[1]"
 FOUNDER_OTHER_INFO = "//span[text()='Other']/following-sibling::div[1]"
 
@@ -44,14 +45,24 @@ DASHBOARD_WEEKLY_LIMIT_NOTICE = "You've exhausted your 20 invites for the week. 
 FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE = "You can keep skipping or hiding profiles, but cannot send any more invites. Check back on Monday when invites refresh!"
 
 # GPT Instructions
+CHAT_GPT_SYSTEM_PERSONA = "You answer all queries either with {'output': 'Pass'} or {'output': 'Fail'} depending on how you are prompted"
 CHAT_GPT_PROMPT_ONE = "I'm analyzing the profile of a potential startup cofounder. Here is the founder's intro: {founder_intro}."
 CHAT_GPT_PROMPT_TWO = "Here is the founder's life story: {life_story}."
 CHAT_GPT_PROMPT_THREE = "Here's what the founder does in their free time: {free_time}."
 CHAT_GPT_PROMPT_FOUR = "Here's some other information about the founder: {other_info}."
 CHAT_GPR_PROMPT_FIVE = "Here are the founder's notable accomplishments: {impressive_accomplishment}."
 CHAT_GPT_PROMPT_SIX = "Here are some potential startup ideas the founder has: {potential_ideas}."
-PROMPT_ENDING = "Your answer must be formatted like this: {'output': 'Pass'} or {'output': 'Fail'}. You say Pass if the answer for at least one of the questions I asked is Yes. You say Fail if the answer for at least one of the questions I asked is No."
+PROMPT_ENDING = "Your answer must be formatted exactly like this: {'output': 'Pass'} or {'output': 'Fail'}. You say {'output': 'Pass'} if the answer for at least one of the questions I asked is Yes. You say {'output': 'Fail'} if the answer for at least one of the questions I asked is No."
 GPT_MODEL = "gpt-4o-2024-05-13"
+GPT_MAX_TOKENS = 25
+GPT_TEMPERATURE = 0
+GPT_ANSWER_PASS = "'output': 'Pass'"
+GPT_ANSWER_FAIL = "'output': 'Fail'"
+
+# Error messages
+GPT_PROMPT_CREATION_FAILED = "Could not create GPT prompt"
+NO_ANSWER_FROM_GPT = "GPT couldn't answer"
+CANNOT_CALL_GPT = "Could not call GPT API"
 
 # Input Validation Constants
 MAX_CITY_LENGTH = 30
