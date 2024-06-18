@@ -1,0 +1,14 @@
+.env
+.venv
+venv
+.DS_Store
+proxies_extension.zip
+
+__pycache__
+my_profile/__pycache__
+proxy/__pycache__
+scout/__pycache__
+sign_in/__pycache__
+utils/__pycache__
+
+founder_messages.py
