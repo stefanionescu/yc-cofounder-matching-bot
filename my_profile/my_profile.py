@@ -80,9 +80,11 @@ class MyProfile():
             # TODO: log this to email
             return True
         
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-        if CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE not in soup.get_text():
+        weekly_limit_box = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.DASHBOARD_LIMIT_NOTICE_BOX)
+        if len(weekly_limit_box) != 1: 
+            # TODO: log to email
+            return True
+        if CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE in weekly_limit_box[0].text:
             return False
         
-        # TODO: log this to email
         return True

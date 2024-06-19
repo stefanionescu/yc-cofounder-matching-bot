@@ -27,12 +27,12 @@ def add_chrome_options(chrome_options):
     """
     Adds necessary Chrome options for the browser.
     """
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--headless=new')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--disable-infobars')
-    chrome_options.add_experimental_option("useAutomationExtension", False)
+    # chrome_options.add_argument('--no-sandbox')
+    # chrome_options.add_argument('--headless=new')
+    # chrome_options.add_argument('--disable-dev-shm-usage')
+    # chrome_options.add_argument('--disable-gpu')
+    # chrome_options.add_argument('--disable-infobars')
+    # chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument('--enable-logging')
     chrome_options.add_argument('--v=1')
     chrome_options.add_argument('--log-level=0')
@@ -107,39 +107,37 @@ def log_into_account(driver):
     my_profile = MyProfile(driver)
     return my_profile.check_dashboard_weekly_limit_reached()
 
-def find_cofounders(driver, bot_start_time):
+def find_cofounders(driver):
     """
     Search and contact cofounders.
     """
     print("Prepping scout...")
 
-    cofounder_scout = Scout(driver, bot_start_time)
+    cofounder_scout = Scout(driver)
 
     cofounder_scout.go_to_discover()
     is_alum = cofounder_scout.is_yc_alumn()
     print("yc alum or not?")
     print(is_alum)
 
-    interests_match = cofounder_scout.important_interests_match()
+    profile_info = cofounder_scout.get_profile_info()
+    print(profile_info)
+
+    interests_match = cofounder_scout.important_interests_match(profile_info['shared_interests'])
     print("match interests:")
     print(interests_match)
 
-    profile_info = cofounder_scout.get_profile_info()
-    print("profile info:")
-    print(profile_info)
-
-    utils.random_long_sleep()
-    utils.random_long_sleep()
-
-    # gpt_answer = cofounder_scout.analyze_with_gpt(profile_info)
+    gpt_answer = cofounder_scout.analyze_with_gpt(profile_info)
+    print("final answer from gpt:")
+    print(gpt_answer)
     # print("final gpt answer:")
     # print(gpt_answer)
 
-    print("Saving current founder profile...")
-    cofounder_scout.save_founder()
+    # print("Saving current founder profile...")
+    # cofounder_scout.save_founder()
 
-    print("Going back to my preferred city...")
-    cofounder_scout.go_back_to_preferred_city()
+    # print("Going back to my preferred city...")
+    # cofounder_scout.go_back_to_preferred_city()
 
     # cofounder_scout.find_cofounders()
 
@@ -147,8 +145,6 @@ def main():
     """
     Main execution routine.
     """
-    bot_start_time = int(time())
-
     if not check_yc_creds():
         print("Invalid YC credentials. Please check environment variables.")
         return
@@ -162,10 +158,12 @@ def main():
         driver.get(CONSTANTS.BASE_URL)
         utils.random_normal_sleep()
 
-        if not log_into_account(driver):
+        login_output = log_into_account(driver)
+        if not login_output:
+            print("Finish at login")
             return
 
-        find_cofounders(driver, bot_start_time)
+        find_cofounders(driver)
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:

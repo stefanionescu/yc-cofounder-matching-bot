@@ -86,29 +86,34 @@ class Scout:
         """ Extracts all relevant information from a founder's profile page. """
         try:
             profile_info = {
-                'intro': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_INTRO),
-                'life_story': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_LIFE_STORY),
-                'free_time': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_FREE_TIME),
-                'other_info': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_OTHER_INFO),
-                'equity_expectations': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_EQUITY_EXPECTATIONS),
-                'accomplishments': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_IMPRESSIVE_ACCOMPLISHMENT),
-                'potential_ideas': self.extract_text(By.CSS_SELECTOR, CONSTANTS.FOUNDER_POTENTIAL_IDEAS),
+                'intro': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_INTRO).rstrip().replace("\n", ""),
+                'life_story': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_LIFE_STORY).rstrip().replace("\n", ""),
+                'free_time': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_FREE_TIME).rstrip().replace("\n", ""),
+                'other_info': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_OTHER_INFO).rstrip().replace("\n", ""),
+                'equity_expectations': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_EQUITY_EXPECTATIONS).rstrip().replace("\n", ""),
+                'accomplishments': self.extract_text(By.XPATH, CONSTANTS.FOUNDER_IMPRESSIVE_ACCOMPLISHMENT).rstrip().replace("\n", ""),
+                'potential_ideas': self.extract_text(By.CSS_SELECTOR, CONSTANTS.FOUNDER_POTENTIAL_IDEAS).rstrip().replace("\n", ""),
                 'shared_interests': self.extract_interests(By.XPATH, CONSTANTS.FOUNDER_SHARED_INTERESTS_SPAN)
             }
-            return profile_info if all(profile_info.values()) else None
+            return profile_info
         except Exception as e:
             print(f"Error extracting profile information: {e}")
             return None
 
     def extract_text(self, by, locator):
         """ Helper function to safely extract text from a single element. """
-        element = self.driver.find_element(by, locator)
-        return element.text.strip() if element else None
+        element = self.driver.find_elements(by, locator)
+        if len(element) != 1: return ""
+        return element[0].text.strip()
 
     def extract_interests(self, by, locator):
         """ Helper function to extract interests from profile, assumes they are in div tags. """
         interests_span = self.driver.find_elements(by, locator)
-        return {div.text for div in interests_span[0].find_elements(By.TAG_NAME, 'div')} if interests_span else set()
+        if len(interests_span) != 1: return set()
+        interests_array = []
+        for div in interests_span[0].find_elements(By.TAG_NAME, 'div'):
+            interests_array.append(div.text)
+        return set(interests_array)
 
     def analyze_with_gpt(self, profile_info):
         """ Analyze the founder's profile using GPT and determine interest. """
@@ -117,13 +122,15 @@ class Scout:
             return None, False
         
         prompt_text = self.generate_gpt_prompt(profile_info)
+        print("gpt prompt:")
+        print(prompt_text)
         if not prompt_text:
             print("Failed to generate a valid GPT prompt.")
             return None, False
         
         try:
             response = self.call_gpt_api(prompt_text)
-            print("the GPT response is:")
+            print("The GPT response is:")
             print(response)
             return self.interpret_gpt_response(response)
         except Exception as e:
@@ -150,20 +157,31 @@ class Scout:
         return answer, CONSTANTS.GPT_ANSWER_PASS in answer
 
     def generate_gpt_prompt(self, profile_info):
-        """ Generate a detailed prompt for GPT based on the founder's profile. """
+        """ Generate a detailed prompt for GPT based on the founder's profile, omitting empty or None values. """
         if not profile_info:
-            return ""
-        parts = [
-            CONSTANTS.CHAT_GPT_PROMPT_ONE.format(founder_intro=profile_info['intro']),
-            CONSTANTS.CHAT_GPT_PROMPT_TWO.format(life_story=profile_info['life_story']),
-            CONSTANTS.CHAT_GPT_PROMPT_THREE.format(free_time=profile_info['free_time']),
-            CONSTANTS.CHAT_GPT_PROMPT_FOUR.format(other_info=profile_info['other_info']),
-            CONSTANTS.CHAT_GPT_PROMPT_FIVE.format(impressive_accomplishment=profile_info['accomplishments']),
-            CONSTANTS.CHAT_GPT_PROMPT_SIX.format(potential_ideas=profile_info['potential_ideas']),
-            CONSTANTS.PROMPT_ENDING,
-            self.gpt_questions
-        ]
-        return " ".join(filter(None, parts))
+            return None
+
+        # Build prompt parts conditionally
+        parts = []
+        if profile_info.get('intro'):
+            parts.append(CONSTANTS.CHAT_GPT_PROMPT_ONE.format(founder_intro=profile_info['intro']))
+        if profile_info.get('life_story'):
+            parts.append(CONSTANTS.CHAT_GPT_PROMPT_TWO.format(life_story=profile_info['life_story']))
+        if profile_info.get('free_time'):
+            parts.append(CONSTANTS.CHAT_GPT_PROMPT_THREE.format(free_time=profile_info['free_time']))
+        if profile_info.get('other_info'):
+            parts.append(CONSTANTS.CHAT_GPT_PROMPT_FOUR.format(other_info=profile_info['other_info']))
+        if profile_info.get('accomplishments'):
+            parts.append(CONSTANTS.CHAT_GPT_PROMPT_FIVE.format(impressive_accomplishment=profile_info['accomplishments']))
+        if profile_info.get('potential_ideas'):
+            parts.append(CONSTANTS.CHAT_GPT_PROMPT_SIX.format(potential_ideas=profile_info['potential_ideas']))
+
+        # Always add ending and questions
+        parts.append(CONSTANTS.PROMPT_QUESTIONS_SECTION + self.gpt_questions)
+        parts.append(CONSTANTS.PROMPT_ENDING)
+
+        # Join all non-empty, non-None parts with a space
+        return "\n\n".join(parts)
 
     def contact_founder(self, interest_group):
         """ Contact a founder based on a specific interest group. """
@@ -275,8 +293,8 @@ class Scout:
             return self.skip_founder()
 
         profile_info = self.get_profile_info()
-        if not profile_info:
-            return False  # Skip profile if no info is extracted
+        if not profile_info or profile_info["shared_interests"] == set():
+            return self.skip_founder() # Skip profile if no or incomplete info was extracted
 
         interest_group = self.important_interests_match(profile_info['shared_interests'])
         if interest_group == -1:
