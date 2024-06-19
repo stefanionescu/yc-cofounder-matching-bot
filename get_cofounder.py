@@ -82,7 +82,6 @@ def check_general_vars():
     max_founders_to_contact = os.getenv("MAX_FOUNDERS_TO_CONTACT", 0)
     shared_interests = os.getenv("IMPORTANT_SHARED_INTERESTS", "").split(";")
 
-
     if city_to_return_to == "" or len(city_to_return_to) <= 2:
         return False
     if not max_runtime or not 600 <= int(max_runtime) <= 1500:
@@ -137,7 +136,7 @@ def main():
         if not log_into_account(driver):
             return
 
-        find_cofounders(driver, bot_start_time)
+        # find_cofounders(driver, bot_start_time)
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
