@@ -1,4 +1,5 @@
 import os
+import sys
 from time import time
 from openai import OpenAI
 from bs4 import BeautifulSoup
@@ -20,16 +21,15 @@ class Scout():
         self.skipped_founders = 0
         self.saved_founders = 0
         self.skipped_cities = 0
-        self.saved_founder_profiles = []
-        self.contacted_founders_profiles = []
 
         self.cities = os.getenv("YC_CITIES").split(";")
         self.city_to_return_to = os.getenv("CITY_TO_RETURN_TO")
         self.bot_max_run_time = os.getenv("BOT_MAX_RUN_TIME", 600)
-        self.contact_founders = os.getenv("CONTACT_FOUNDERS", "false")
+        self.contact_founders_flag = os.getenv("CONTACT_FOUNDERS", "false")
         self.max_founders_to_contact = os.getenv("MAX_FOUNDERS_TO_CONTACT", 1)
         self.analyze_profile_with_gpt = os.getenv("ANALYZE_PROFILES_WITH_GPT", "false")
-        self.gpt_api_key = os.getenv("CHAT_GPT_API_KEY", "")
+        self.gpt_organization = os.getenv("CHAT_GPT_ORGANIZATION", "")
+        self.gpt_project = os.getenv("CHAT_GPT_PROJECT", "")
         self.skip_yc_alumni = os.getenv("SKIP_YC_ALUMNI", "false")
         self.gpt_questions = os.getenv("CHAT_GPT_QUESTIONS", "")
 
@@ -41,34 +41,84 @@ class Scout():
 
         self.my_profile = MyProfile(self.driver)
 
-    def check_elapsed_time(self):
-        return (int(time()) - self.bot_start_time < os.getenv("BOT_MAX_RUN_TIME"))
+    def check_elapsed_time(self, time_limit):
+        return (int(time()) - self.bot_start_time < time_limit)
     
     def can_form_group(group, category_set):
         return all(item in category_set for item in group)
+    
+    def still_have_time(self):
+        return (self.check_elapsed_time(self.bot_max_run_time) and self.check_elapsed_time(CONSTANTS.MAX_POSSIBLE_ELAPSED_TIME))
+    
+    def get_candidate_id(self):
+        return 
 
-    def search_profiles(self, city):
-        # If not on discover page, try to go. If cannot go, return and skip city
+    def search_profiles(self):
+        # If not on discover page, increment skipped cities and return
+        if not self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL): 
+            self.skipped_cities += 1
+            return False
         # While time did not elapse and while there are still profiles to see in the current city, loop through profiles
-        # See if we need to check if they are yc alum. If we check and they are, skip. If we check and they aren't, continue
-        # Get profile data
-        # Check if your preferences match. If not, skip. If yes, continue
-        # See if we need to get GPT's opinion. Depending on opinion, decide if we skip or continue
-        # See if we message or save and proceed accordingly
-        # Append data about which founders were skipped, saved and messaged
-
-
+        while self.still_have_time():
+            # See if we need to check if they are a YC alum. If we check and they are, skip. If we check and they aren't, continue to analyze the profile
+            if self.skip_yc_alumni == "true" and self.is_yc_alumn():
+                skip_result = self.skip_founder()
+                if not skip_result: sys.exit()
+                continue
+            # Get profile info
+            profile_info = self.get_profile_info()
+            if profile_info is None:
+                # TODO: log to email
+                sys.exit()
+            # Check if your preferences match. If not, skip. If yes, continue
+            interest_group = self.important_interests_match(profile_info.shared_interests)
+            if interest_group == -1:
+                skip_result = self.skip_founder()
+                if not skip_result: sys.exit()
+                continue
+            # See if we need to get GPT's opinion and if self.gpt_questions is not null. Depending on opinion, decide if we skip or save/contact the founder
+            gpt_outcome = "failed"
+            if self.gpt_questions != "" and self.analyze_profile_with_gpt == "true":
+                gpt_analysis = self.analyze_with_gpt(profile_info)
+                # If there was an error with GPT, skip this section
+                if gpt_analysis[0] == "":
+                    # If we need to contact and we contacted less profiles than the max, send message to founder
+                    if self.contacted_founders < self.max_founders_to_contact and self.contact_founders_flag == "true":
+                        contact_founder_result = self.contact_founder(interest_group)
+                        if contact_founder_result == False: sys.exit()
+                        gpt_outcome = "succeeded"
+                    # Otherwise just save the profile
+                    else:
+                        save_founder_result = self.save_founder()
+                        if save_founder_result == False: sys.exit()
+                        gpt_outcome = "succeeded"
+                        
+            if gpt_outcome == "failed":
+                # If we need to contact and we contacted less profiles than the max, send message to founder
+                if self.contacted_founders < self.max_founders_to_contact and self.contact_founders_flag == "true":
+                    contact_founder_result = self.contact_founder(interest_group)
+                    if contact_founder_result == False: sys.exit()
+                # Otherwise just save the profile
+                else:
+                    save_founder_result = self.save_founder()
+                    if save_founder_result == False: sys.exit()
+                    
         # Return True when we don't have any more profiles to see
-
-        pass
+        return True
 
     def change_cities_and_search_profiles(self):
         for city in self.cities:
+            if (not self.still_have_time()): break
             if not self.my_profile.go_to_profile_and_change_city(city):
                 self.skipped_cities += 1
-                next
+                continue
             
-            search_result = self.search_profiles(city)
+            if not self.go_to_discover():
+                # TODO: log to email
+                self.skipped_cities += 1
+                continue
+
+            search_result = self.search_profiles()
             if not search_result: 
                 # TODO: log to email
                 break
@@ -89,6 +139,7 @@ class Scout():
         return False
     
     def important_interests_match(self, interests_set):
+        if len(interests_set) == 0: return -1
         for index, interests in enumerate(self.important_interests):
             if self.can_form_group(interests, interests_set):
                 return index
@@ -98,17 +149,29 @@ class Scout():
     def get_profile_info(self):
         profile_info = {}
         # Get intro
-        profile_info.intro = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_INTRO).text.rstrip()
+        intro = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_INTRO)
+        if intro is None or len(intro) != 1: return None
+        profile_info.intro = intro[0].text.rstrip()
         # Get life story
-        profile_info.life_story = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_LIFE_STORY).text.rstrip()
+        life_story = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_LIFE_STORY)
+        if life_story is None or len(life_story) != 1: return None
+        profile_info.life_story = life_story[0].text.rstrip()
         # Get free time
-        profile_info.free_time = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_FREE_TIME).text.rstrip()
+        free_time = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_FREE_TIME)
+        if free_time is None or len(free_time) != 1: return None
+        profile_info.free_time = free_time[0].text.rstrip()
         # Get other info
-        profile_info.other = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_OTHER_INFO).text.rstrip()
+        other = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_OTHER_INFO)
+        if other is None or len(other) != 1: return None
+        profile_info.other = other[0].text.rstrip()
         # Get equity expectations
-        profile_info.equity_expectations = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_EQUITY_EXPECTATIONS).text.rstrip()
+        equity_expectations = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_EQUITY_EXPECTATIONS)
+        if equity_expectations is None or len(equity_expectations) != 1: return None
+        profile_info.equity_expectations = equity_expectations[0].text.rstrip()
         # Get impressive accomplishments
-        profile_info.accomplishments = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_IMPRESSIVE_ACCOMPLISHMENT).text.rstrip()
+        accomplishments = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_IMPRESSIVE_ACCOMPLISHMENT)
+        if accomplishments is None or len(accomplishments) != 1: return None
+        profile_info.accomplishments = accomplishments[0].text.rstrip()
         # Get potential ideas
         profile_info.potential_ideas = ""
         potential_ideas = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.FOUNDER_POTENTIAL_IDEAS)
@@ -116,9 +179,11 @@ class Scout():
             profile_info.potential_ideas = potential_ideas[0].text.rstrip()
         # Get shared interests
         profile_info.shared_interests = set()
-        shared_interests_span = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_SHARED_INTERESTS_SPAN).find_elements(By.TAG_NAME, "div")
+        shared_interests_span = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_SHARED_INTERESTS_SPAN)
+        if shared_interests_span is None or len(shared_interests_span) != 1: return profile_info
+        shared_interests_divs = shared_interests_span[0].find_elements(By.TAG_NAME, "div")
         interests_array = []
-        for interest in shared_interests_span:
+        for interest in shared_interests_divs:
             interests_array.append(interest.text)
         if len(interests_array) > 0:
             profile_info.shared_interests = set(interests_array)
@@ -127,15 +192,15 @@ class Scout():
     def analyze_with_gpt(self, profile_info):
         if profile_info is None: 
             # TODO: log to email
-            return (False, None)
+            return (CONSTANTS.EMPTY_PROFILE_INFO, False)
 
         gpt = OpenAI(
-            organization= os.getenv("CHAT_GPT_ORGANIZATION"),
-            project=os.getenv("CHAT_GPT_API_KEY")
+            organization=self.gpt_organization,
+            project=self.gpt_project
         )
 
         prompt_text = self.generate_gpt_prompt(profile_info)
-        if prompt_text is None or prompt_text == "": return (CONSTANTS.GPT_PROMPT_CREATION_FAILED, True)
+        if prompt_text is None or prompt_text == "": return (CONSTANTS.GPT_PROMPT_CREATION_FAILED, False)
 
         try:
             gpt_response = gpt.chat.completions.create(
@@ -150,7 +215,7 @@ class Scout():
 
             if 'choices' not in gpt_response or gpt_response['choices'] is None:
                 # TODO: log to email
-                return (CONSTANTS.NO_ANSWER_FROM_GPT, True)
+                return (CONSTANTS.NO_ANSWER_FROM_GPT, False)
             
             gpt_likes_founder = False
             if CONSTANTS.GPT_ANSWER_PASS in gpt_response.choices[0].message:
@@ -159,7 +224,7 @@ class Scout():
             return ("", gpt_likes_founder)
         except Exception as e:
             # TODO: log to email
-            return (CONSTANTS.CANNOT_CALL_GPT, True)
+            return (CONSTANTS.CANNOT_CALL_GPT, False)
 
     def generate_gpt_prompt(self, profile_info):
         gpt_prompt = CONSTANTS.CHAT_GPT_PROMPT_ONE.format(founder_intro=profile_info.intro) + \
@@ -174,7 +239,9 @@ class Scout():
                      " " + \
                      CONSTANTS.CHAT_GPT_PROMPT_SIX.format(potential_ideas=profile_info.potential_ideas) + \
                      " " + \
-                     CONSTANTS.PROMPT_ENDING
+                     CONSTANTS.PROMPT_ENDING + \
+                     " " + \
+                     self.gpt_questions
         
         return gpt_prompt
 
@@ -187,7 +254,9 @@ class Scout():
         
         message_field = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_MESSAGE_FIELD)
         send_message_button = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_INVITE_TO_CONNECT_BUTTON)
-        if len(message_field) != 1 or len(send_message_button) != 2: return False
+        if len(message_field) != 1 or len(send_message_button) != 2: 
+            # TODO: log to email
+            return False
 
         message_field.clear()
         message_field.send_keys(founder_messages[interest_group])
@@ -205,6 +274,8 @@ class Scout():
 
         skip_button.click()
         utils.random_normal_sleep()
+
+        self.skipped_founders += 1
         return True
 
     def save_founder(self):
@@ -217,6 +288,8 @@ class Scout():
         utils.random_short_sleep()
         next_founder_button.click()
         utils.random_normal_sleep()
+
+        self.saved_founders += 1
         return True
 
     def go_back_to_preferred_city(self):

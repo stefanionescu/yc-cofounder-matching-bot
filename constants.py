@@ -59,13 +59,15 @@ GPT_TEMPERATURE = 0
 GPT_ANSWER_PASS = "'output': 'Pass'"
 GPT_ANSWER_FAIL = "'output': 'Fail'"
 
-# Error messages
+# Error Messages
 GPT_PROMPT_CREATION_FAILED = "Could not create GPT prompt"
 NO_ANSWER_FROM_GPT = "GPT couldn't answer"
 CANNOT_CALL_GPT = "Could not call GPT API"
+EMPTY_PROFILE_INFO = "Profile info is empty"
 
 # Input Validation Constants
 MAX_CITY_LENGTH = 30
+MAX_POSSIBLE_ELAPSED_TIME = 1500
 
 # Time Delays and Wait Periods
 SHORT_MIN_SECONDS_TO_WAIT = 4
