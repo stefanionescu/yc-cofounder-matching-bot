@@ -111,8 +111,37 @@ def find_cofounders(driver, bot_start_time):
     """
     Search and contact cofounders.
     """
+    print("Prepping scout...")
+
     cofounder_scout = Scout(driver, bot_start_time)
-    cofounder_scout.find_cofounders()
+
+    cofounder_scout.go_to_discover()
+    is_alum = cofounder_scout.is_yc_alumn()
+    print("yc alum or not?")
+    print(is_alum)
+
+    interests_match = cofounder_scout.important_interests_match()
+    print("match interests:")
+    print(interests_match)
+
+    profile_info = cofounder_scout.get_profile_info()
+    print("profile info:")
+    print(profile_info)
+
+    utils.random_long_sleep()
+    utils.random_long_sleep()
+
+    # gpt_answer = cofounder_scout.analyze_with_gpt(profile_info)
+    # print("final gpt answer:")
+    # print(gpt_answer)
+
+    print("Saving current founder profile...")
+    cofounder_scout.save_founder()
+
+    print("Going back to my preferred city...")
+    cofounder_scout.go_back_to_preferred_city()
+
+    # cofounder_scout.find_cofounders()
 
 def main():
     """
@@ -136,7 +165,7 @@ def main():
         if not log_into_account(driver):
             return
 
-        # find_cofounders(driver, bot_start_time)
+        find_cofounders(driver, bot_start_time)
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
