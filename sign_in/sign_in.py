@@ -17,7 +17,7 @@ class SignIn():
 
         if not userid_field or not pass_field or not sign_in_btn:
             # Log error or send email
-            self.log_error("Sign-in fields are missing on the page.")
+            print("Sign-in fields are missing on the page.")
             return False
 
         # Fill in credentials and submit form
@@ -25,15 +25,17 @@ class SignIn():
         return True
 
     def fill_and_submit_form(self, userid_field, pass_field, sign_in_btn):
+        print("Typing the sign in details and logging in...")
         userid_field.send_keys(os.getenv("YC_USERNAME"))
         pass_field.send_keys(os.getenv("YC_PASSWORD"))
         sign_in_btn.click()
         utils.random_long_sleep()
 
     def go_to_sign_in(self):
+        print("Going to the login page...")
         sign_in_button = self.find_element(By.XPATH, CONSTANTS.LANDING_PAGE_SIGN_IN_BUTTON)
         if not sign_in_button:
-            self.log_error("Sign-in button not found on landing page.")
+            print("Sign-in button not found on landing page.")
             return False
 
         sign_in_button.click()
@@ -45,7 +47,3 @@ class SignIn():
         if len(elements) == 1:
             return elements[0]
         return None
-
-    def log_error(self, message):
-        # TODO: Log this error to a file or send an email alert
-        print(message)

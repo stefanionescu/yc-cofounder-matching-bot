@@ -10,6 +10,7 @@ from proxy.extension import proxies
 from utils.utils import Utils as utils
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
+from logging.logging import Logging as custom_log
 from selenium.webdriver.chrome.options import Options
 
 def setup_chrome_driver():
@@ -47,9 +48,10 @@ def configure_proxy_if_needed(chrome_options):
         if None not in proxy_details.values():
             proxy_extension = proxies(**proxy_details)
             chrome_options.add_extension(proxy_extension)
-            print("Proxy setup complete.")
+            print("GET_COFOUNDER: Proxy setup complete.")
         else:
-            print("Incomplete proxy configuration. Check environment variables.")
+            log_message()
+            print("GET_COFOUNDER: Incomplete proxy configuration. Check environment variables.")
 
 def get_proxy_details():
     """
@@ -82,15 +84,27 @@ def check_general_vars():
     max_founders_to_contact = os.getenv("MAX_FOUNDERS_TO_CONTACT", 0)
     shared_interests = os.getenv("IMPORTANT_SHARED_INTERESTS", "").split(";")
 
+    email_from = os.getenv("EMAIL_FROM", "")
+    email_to = os.getenv("EMAIL_TO", "")
+    email_from_password = os.getenv("EMAIL_FROM_PASSWORD", "")
+
     if city_to_return_to == "" or len(city_to_return_to) <= 2:
+        print("GET_COFOUNDER: Invalid city to return to.")
         return False
     if not max_runtime or not 600 <= int(max_runtime) <= 1500:
+        print("GET_COFOUNDER: Invalid max runtime.")
         return False
     if use_gpt and (not gpt_key or gpt_key != "") and (not gpt_org or gpt_org != "") and (not gpt_project_id or gpt_project_id != ""):
+        print("GET_COFOUNDER: Invalid GPT params.")
         return False
     if contact_founders and not 0 < int(max_founders_to_contact) or contact_founders and len(founder_messages) == 0:
+        print("GET_COFOUNDER: Invalid founders contact setup.")
         return False
     if shared_interests[0] == "" or (len(shared_interests) != len(founder_messages)):
+        print("GET_COFOUNDER: Invalid shared interests.")
+        return False
+    if email_from == "" or email_from_password == "" or email_to == "":
+        print("GET_COFOUNDER: Invalid email setup.")
         return False
 
     return True
@@ -101,7 +115,7 @@ def log_into_account(driver):
     """
     sign_in = SignIn(driver)
     if not sign_in.go_to_sign_in() or not sign_in.sign_in():
-        print("Failed to navigate to sign-in page or log in.")
+        print("GET_COFOUNDER: Failed to navigate to sign-in page or log in.")
         return False
 
     my_profile = MyProfile(driver)
@@ -114,30 +128,37 @@ def find_cofounders(driver):
     cofounder_scout = Scout(driver)
     cofounder_scout.find_cofounders()
 
+def log_message(self, hit_weekly_limit, bot_error):
+    custom_log.log_report_to_email_and_quit(hit_weekly_limit, bot_error, None, None, None, None, None, None)
+
 def main():
     """
     Main execution routine.
     """
     if not check_yc_creds():
-        print("Invalid YC credentials. Please check environment variables.")
         return
     
     if not check_general_vars():
-        print("Invalid bot vars. Please check environment variables.")
         return
 
+    print("GET_COFOUNDER: Setting up the Chrome driver...")
     driver = setup_chrome_driver()
     try:
+        print("GET_COFOUNDER: Navigating to YC's website...")
         driver.get(CONSTANTS.BASE_URL)
         utils.random_normal_sleep()
 
+        print("GET_COFOUNDER: Logging in...")
         login_output = log_into_account(driver)
         if not login_output:
+            print("GET_COFOUNDER: Could not log into YC Cofounder Matching.")
             return
 
+        print("GET_COFOUNDER: Starting the cofounder search...")
         find_cofounders(driver)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"GET_COFOUNDER: An error occurred: {e}")
+        log_message(None, str(e))
     finally:
         driver.quit()
 

@@ -69,6 +69,17 @@ NO_ANSWER_FROM_GPT = "GPT couldn't answer"
 CANNOT_CALL_GPT = "Could not call GPT API"
 EMPTY_PROFILE_INFO = "Profile info is empty"
 
+# Emails
+REPORT_TITLE = "Today's YC Cofounder Scraping Report"
+REPORT_INTRO = "Hi, here's today's YC Cofounder scraping report:\n\n"
+REPORT_WEEKLY_LIMIT_REACHED = "I couldn't scrape anything because we've hit the weekly limit to contact founders. I'll try to scrape again soon.\n\n"
+REPORT_BOT_ERROR = "I got the following error when trying to scrape:\n\n{bot_error}\n\n"
+REPORT_CITIES_SKIPPED = "I skipped the following cities: {skipped_cities}.\n\n"
+REPORT_PROFILES_CONTACTED = "I contacted a total of {contacted_founders} founders. {contacted_founders_breakdown}.\n\n"
+REPORT_PROFILES_SAVED = "I saved a total of {saved_founders} founders. {saved_founders_breakdown}.\n\n"
+REPORT_PROFILES_SKIPPED = "I skipped a total of {skipped_founders} founders.\n\n"
+REPORT_END = "That's it for today!"
+
 # Input Validation Constants
 MAX_CITY_LENGTH = 30
 MAX_POSSIBLE_ELAPSED_TIME = 1500

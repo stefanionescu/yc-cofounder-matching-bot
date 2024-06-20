@@ -10,5 +10,6 @@ proxy/__pycache__
 scout/__pycache__
 sign_in/__pycache__
 utils/__pycache__
+logging/__pycache__
 
 founder_messages.py
