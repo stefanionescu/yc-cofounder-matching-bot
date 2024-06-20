@@ -6,7 +6,7 @@ from utils.utils import Utils as utils
 from selenium.webdriver.common.by import By
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
-from logging.logging import Logging as custom_log
+from logging.logging import Logging
 
 class Scout:
     def __init__(self, driver):
@@ -14,10 +14,11 @@ class Scout:
         self.driver = driver
         self.bot_start_time = time()
         self.initialize_environment()
+        self.email_logging = Logging()
 
     def log_message(self, hit_weekly_limit, bot_error):
-        final_error = None if bot_error == "" else bot_error
-        custom_log.log_report_to_email(
+        final_error = None if bot_error == "" else str(bot_error)
+        self.email_logging.log_report_to_email(
             hit_weekly_limit, 
             final_error, 
             self.skipped_cities_list, 
@@ -73,8 +74,11 @@ class Scout:
             discover.click()
             utils.random_long_sleep()
             return self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL)
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Failed to navigate to Discover: {e}")
+            self.log_message(None, e)
             return False
 
     def is_yc_alumn(self):
@@ -87,8 +91,11 @@ class Scout:
             if former_yc_founder or current_yc_founder:
                 return True
             return False
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Error checking YC alumni status: {e}")
+            self.log_message(None, e)
             return False
 
     def important_interests_match(self, interests_set):
@@ -116,6 +123,7 @@ class Scout:
             return profile_info
         except Exception as e:
             print(f"SCOUT: Error extracting profile information: {e}")
+            self.log_message(None, e)
             return None
 
     def extract_text(self, by, locator):
@@ -147,8 +155,11 @@ class Scout:
         try:
             response = self.call_gpt_api(prompt_text)
             return self.interpret_gpt_response(response)
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Failed to call GPT API: {e}")
+            self.log_message(None, e)
             return None, False
 
     def call_gpt_api(self, prompt):
@@ -220,8 +231,11 @@ class Scout:
             utils.random_normal_sleep()
             self.contacted_founders += 1
             return True
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Failed to contact founder: {e}")
+            self.log_message(None, e)
             return False
 
     def skip_founder(self):
@@ -232,8 +246,11 @@ class Scout:
             utils.random_normal_sleep()
             self.skipped_founders += 1
             return True
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Failed to skip founder: {e}")
+            self.log_message(None, e)
             return False
 
     def save_founder(self):
@@ -250,8 +267,11 @@ class Scout:
             utils.random_normal_sleep()
             self.saved_founders += 1
             return True
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Failed to save founder: {e}")
+            self.log_message(None, e)
             return False
 
     def go_back_to_preferred_city(self):
@@ -264,8 +284,11 @@ class Scout:
             self.setup_discovery()
             self.handle_city_profiles()
             self.wrap_up_search()
+        except SystemError as e:
+            sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Exception during cofounder search: {e}")
+            self.log_message(None, e)
 
     def setup_discovery(self):
         """ Prepare for profile discovery by navigating to the discover page if necessary. """
@@ -305,6 +328,10 @@ class Scout:
             if not self.process_current_profile():
                 # TODO: check if the current profile ID in the URL is different than the previous one; if they are identical, we need to stop execution
                 continue  # Skip to next profile if current one is not processed
+        
+        if self.hit_weekly_limit():
+            self.log_message(True, "")
+            
         return True
 
     def process_current_profile(self):
@@ -362,13 +389,13 @@ class Scout:
     def change_city_and_search(self, city):
         """ Change to the specified city and perform profile searching. """
         if not self.my_profile.go_to_profile_and_change_city(city):
-            self.skipped_cities += 1
+            self.skipped_cities_list.append(city)
             return False
-        return self.search_profiles_in_city()
+        return self.search_profiles_in_city(city)
 
-    def search_profiles_in_city(self):
+    def search_profiles_in_city(self, city):
         """ Check and manage profiles searching in the current city. """
         if not self.go_to_discover():
-            self.skipped_cities += 1
+            self.skipped_cities_list.append(city)
             return False
         return self.search_profiles()

@@ -61,7 +61,7 @@ class Logging():
             report += CONSTANTS.REPORT_END
             return report
         
-        if bot_error:
+        if bot_error and bot_error != "":
             report += CONSTANTS.REPORT_BOT_ERROR.format(bot_error=bot_error)
             report += CONSTANTS.REPORT_END
             return report
@@ -92,6 +92,9 @@ class Logging():
 
         if skipped_founders:
             report += CONSTANTS.REPORT_PROFILES_SKIPPED.format(skipped_founders=skipped_founders)
+
+        if len(report) == len(CONSTANTS.REPORT_INTRO):
+            report += CONSTANTS.REPORT_NO_DATA
 
         report += CONSTANTS.REPORT_END
         return report

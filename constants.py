@@ -78,6 +78,7 @@ REPORT_CITIES_SKIPPED = "I skipped the following cities: {skipped_cities}.\n\n"
 REPORT_PROFILES_CONTACTED = "I contacted a total of {contacted_founders} founders. {contacted_founders_breakdown}.\n\n"
 REPORT_PROFILES_SAVED = "I saved a total of {saved_founders} founders. {saved_founders_breakdown}.\n\n"
 REPORT_PROFILES_SKIPPED = "I skipped a total of {skipped_founders} founders.\n\n"
+REPORT_NO_DATA = "Couldn't log any data so something else must have gone wrong."
 REPORT_END = "That's it for today!"
 
 # Input Validation Constants
