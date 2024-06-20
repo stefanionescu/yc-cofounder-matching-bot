@@ -13,7 +13,7 @@ class MyProfile():
         submit_button = self.driver.find_elements(By.XPATH, CONSTANTS.MY_PROFILE_SUBMIT_BUTTON)
 
         if not current_location_field or len(current_location_field) != 1 or len(submit_button) != 3:
-            print("Location input field or submit button could not be found")
+            print("MY_PROFILE: Location input field or submit button could not be found")
             return False
         
         if current_location_field[0].get_attribute('value') == city_name:
@@ -37,7 +37,7 @@ class MyProfile():
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
         if CONSTANTS.FIX_ERRORS_STRING not in soup.get_text():
             return True
-        print(f"Probably tried to set a weird city name: {city_name}")
+        print(f"MY_PROFILE: Probably tried to set a weird city name: {city_name}")
         return False
 
     def go_to_first_profile_tab(self):
@@ -46,16 +46,16 @@ class MyProfile():
             basics_button[0].click()
             utils.random_normal_sleep()
             return True
-        print("Failed to find the Basics tab button.")
+        print("MY_PROFILE: Failed to find the Basics tab button.")
         return False
 
     def go_to_profile_and_change_city(self, city_name):
         if not city_name or not city_name.strip() or len(city_name) > CONSTANTS.MAX_CITY_LENGTH:
-            print("Invalid city name or city name is too long.")
+            print("MY_PROFILE: Invalid city name or city name is too long.")
             return False
 
         if not self.navigate_to_profile():
-            print("Failed to navigate to profile.")
+            print("MY_PROFILE: Failed to navigate to profile.")
             return False
 
         if self.driver.current_url.endswith(CONSTANTS.MY_PROFILE_PAGE_URL_PAGE_ONE):
@@ -72,7 +72,7 @@ class MyProfile():
             my_profile[0].click()
             utils.random_normal_sleep()
             return self.driver.current_url.startswith(CONSTANTS.MY_PROFILE_URL)
-        print("My profile button is not found or multiple instances found.")
+        print("MY_PROFILE: My profile button is not found or multiple instances found.")
         return False
     
     def check_dashboard_weekly_limit_reached(self):

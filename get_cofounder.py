@@ -50,7 +50,7 @@ def configure_proxy_if_needed(chrome_options):
             chrome_options.add_extension(proxy_extension)
             print("GET_COFOUNDER: Proxy setup complete.")
         else:
-            log_message()
+            log_message(None, "Incomplete proxy configuration.")
             print("GET_COFOUNDER: Incomplete proxy configuration. Check environment variables.")
 
 def get_proxy_details():
@@ -116,10 +116,13 @@ def log_into_account(driver):
     sign_in = SignIn(driver)
     if not sign_in.go_to_sign_in() or not sign_in.sign_in():
         print("GET_COFOUNDER: Failed to navigate to sign-in page or log in.")
+        log_message(None, "Failed to navigate to sign-in page or log in.")
         return False
 
     my_profile = MyProfile(driver)
-    return my_profile.check_dashboard_weekly_limit_reached()
+    hit_limit = my_profile.check_dashboard_weekly_limit_reached()
+    if hit_limit: log_message(True, None)
+    return hit_limit
 
 def find_cofounders(driver):
     """
@@ -128,8 +131,8 @@ def find_cofounders(driver):
     cofounder_scout = Scout(driver)
     cofounder_scout.find_cofounders()
 
-def log_message(self, hit_weekly_limit, bot_error):
-    custom_log.log_report_to_email_and_quit(hit_weekly_limit, bot_error, None, None, None, None, None, None)
+def log_message(hit_weekly_limit, bot_error):
+    custom_log.log_report_to_email(hit_weekly_limit, bot_error, None, None, None, None, None, None)
 
 def main():
     """
@@ -156,6 +159,8 @@ def main():
 
         print("GET_COFOUNDER: Starting the cofounder search...")
         find_cofounders(driver)
+    except SystemExit as e:
+        print("GET_COFOUNDER: Exited peacefully.")
     except Exception as e:
         print(f"GET_COFOUNDER: An error occurred: {e}")
         log_message(None, str(e))

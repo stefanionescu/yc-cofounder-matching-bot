@@ -1,4 +1,4 @@
-import os
+import os, sys
 from time import time
 import constants as CONSTANTS
 from dotenv import load_dotenv
@@ -6,6 +6,7 @@ from utils.utils import Utils as utils
 from selenium.webdriver.common.by import By
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
+from logging.logging import Logging as custom_log
 
 class Scout:
     def __init__(self, driver):
@@ -13,6 +14,20 @@ class Scout:
         self.driver = driver
         self.bot_start_time = time()
         self.initialize_environment()
+
+    def log_message(self, hit_weekly_limit, bot_error):
+        final_error = None if bot_error == "" else bot_error
+        custom_log.log_report_to_email(
+            hit_weekly_limit, 
+            final_error, 
+            self.skipped_cities_list, 
+            self.contacted_founders if self.contacted_founders > 0 else None, 
+            self.contacted_founders_breakdown,
+            self.saved_founders if self.saved_founders > 0 else None, 
+            self.saved_founders_breakdown,
+            self.skipped_founders if self.skipped_founders > 0 else None
+        )
+        sys.exit(0)
 
     def initialize_environment(self):
         """ Initialize environment variables and set default values. """
@@ -35,7 +50,9 @@ class Scout:
         self.contacted_founders = 0
         self.skipped_founders = 0
         self.saved_founders = 0
-        self.skipped_cities = 0
+        self.saved_founders_breakdown = {}
+        self.contacted_founders_breakdown = {}
+        self.skipped_cities_list = []
 
     def check_elapsed_time(self, time_limit):
         """ Check if the current time is within the allowed time limit. """
@@ -57,7 +74,7 @@ class Scout:
             utils.random_long_sleep()
             return self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL)
         except Exception as e:
-            print(f"Failed to navigate to Discover: {e}")
+            print(f"SCOUT: Failed to navigate to Discover: {e}")
             return False
 
     def is_yc_alumn(self):
@@ -71,7 +88,7 @@ class Scout:
                 return True
             return False
         except Exception as e:
-            print(f"Error checking YC alumni status: {e}")
+            print(f"SCOUT: Error checking YC alumni status: {e}")
             return False
 
     def important_interests_match(self, interests_set):
@@ -98,7 +115,7 @@ class Scout:
             }
             return profile_info
         except Exception as e:
-            print(f"Error extracting profile information: {e}")
+            print(f"SCOUT: Error extracting profile information: {e}")
             return None
 
     def extract_text(self, by, locator):
@@ -119,19 +136,19 @@ class Scout:
     def analyze_with_gpt(self, profile_info):
         """ Analyze the founder's profile using GPT and determine interest. """
         if not profile_info:
-            print("Profile information is incomplete.")
+            print("SCOUT: Profile information is incomplete.")
             return None, False
 
         prompt_text = self.generate_gpt_prompt(profile_info)
         if not prompt_text:
-            print("Failed to generate a valid GPT prompt.")
+            print("SCOUT: Failed to generate a valid GPT prompt.")
             return None, False
 
         try:
             response = self.call_gpt_api(prompt_text)
             return self.interpret_gpt_response(response)
         except Exception as e:
-            print(f"Failed to call GPT API: {e}")
+            print(f"SCOUT: Failed to call GPT API: {e}")
             return None, False
 
     def call_gpt_api(self, prompt):
@@ -152,7 +169,7 @@ class Scout:
     def interpret_gpt_response(self, response):
         """ Interpret GPT's response to determine the next step. """
         if not response.choices or not response.choices[0] or not response.choices[0].message:
-            print("No valid response from GPT.")
+            print("SCOUT: No valid response from GPT.")
             return None, False
         answer = response.choices[0].message.content.strip()
         return answer, CONSTANTS.GPT_ANSWER_PASS in answer
@@ -187,10 +204,10 @@ class Scout:
     def contact_founder(self, interest_group):
         """ Contact a founder based on a specific interest group. """
         if not self.contact_founders_flag:
-            print("Contacting founders is disabled.")
+            print("SCOUT: Contacting founders is disabled.")
             return False
         if interest_group >= len(founder_messages):
-            print("Interest group index out of range.")
+            print("SCOUT: Interest group index out of range.")
             return False
 
         try:
@@ -204,7 +221,7 @@ class Scout:
             self.contacted_founders += 1
             return True
         except Exception as e:
-            print(f"Failed to contact founder: {e}")
+            print(f"SCOUT: Failed to contact founder: {e}")
             return False
 
     def skip_founder(self):
@@ -216,7 +233,7 @@ class Scout:
             self.skipped_founders += 1
             return True
         except Exception as e:
-            print(f"Failed to skip founder: {e}")
+            print(f"SCOUT: Failed to skip founder: {e}")
             return False
 
     def save_founder(self):
@@ -234,7 +251,7 @@ class Scout:
             self.saved_founders += 1
             return True
         except Exception as e:
-            print(f"Failed to save founder: {e}")
+            print(f"SCOUT: Failed to save founder: {e}")
             return False
 
     def go_back_to_preferred_city(self):
@@ -248,13 +265,13 @@ class Scout:
             self.handle_city_profiles()
             self.wrap_up_search()
         except Exception as e:
-            print(f"Exception during cofounder search: {e}")
+            print(f"SCOUT: Exception during cofounder search: {e}")
 
     def setup_discovery(self):
         """ Prepare for profile discovery by navigating to the discover page if necessary. """
         if len(self.cities) == 0 or self.cities[0] == "":
             if not self.go_to_discover():
-                print("Failed to navigate to Discover page.")
+                print("SCOUT: Failed to navigate to Discover page.")
                 return
 
     def handle_city_profiles(self):
@@ -263,27 +280,25 @@ class Scout:
             if not self.still_have_time():
                 break
             if not self.change_city_and_search(city):
-                print(f"Failed to process profiles for city: {city}")
+                print(f"SCOUT: Failed to process profiles for city: {city}")
+                self.skipped_cities_list.append(city)
 
     def change_city_and_search(self, city):
         """ Change to a specific city and search for profiles. """
         if not self.my_profile.go_to_profile_and_change_city(city):
-            self.skipped_cities += 1
             return False
         if not self.go_to_discover():
-            self.skipped_cities += 1
             return False
         return self.search_profiles()
 
     def wrap_up_search(self):
         """ Complete the search process by returning to the preferred city. """
         if not self.go_back_to_preferred_city():
-            print("Failed to return to preferred city.")
+            print("SCOUT: Failed to return to preferred city.")
 
     def search_profiles(self):
         """ Navigate and process profiles on the Discover page. """
         if not self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
-            self.skipped_cities += 1
             return False
 
         while self.still_have_time() and self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL) and not self.hit_weekly_limit():
@@ -342,7 +357,7 @@ class Scout:
             if not self.still_have_time():
                 break
             if not self.change_city_and_search(city):
-                print(f"Failed to process profiles in city: {city}")
+                print(f"SCOUT: Failed to process profiles in city: {city}")
 
     def change_city_and_search(self, city):
         """ Change to the specified city and perform profile searching. """
