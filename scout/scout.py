@@ -286,7 +286,7 @@ class Scout:
             self.skipped_cities += 1
             return False
 
-        while self.still_have_time() and self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
+        while self.still_have_time() and self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL) and not self.hit_weekly_limit():
             if not self.process_current_profile():
                 # TODO: check if the current profile ID in the URL is different than the previous one; if they are identical, we need to stop execution
                 continue  # Skip to next profile if current one is not processed
@@ -317,14 +317,24 @@ class Scout:
         """ Use GPT to analyze the profile and decide on further actions. """
         gpt_analysis = self.analyze_with_gpt(profile_info)
         if not gpt_analysis[1]:  # GPT does not recommend contacting
-            return False
-        return self.contact_or_save_founder(interest_group)
+            return self.save_founder()
+        return self.default_profile_handling(interest_group)
 
     def default_profile_handling(self, interest_group):
         """ Handle profile based on the system settings without GPT analysis. """
         if self.contact_founders_flag and self.contacted_founders < self.max_founders_to_contact:
             return self.contact_founder(interest_group)
         return self.save_founder()
+
+    def hit_weekly_limit(self):
+        limit_paragraph = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH)
+        if len(limit_paragraph) != 1:
+            # TODO: log to email
+            return True
+        if limit_paragraph[0].is_displayed() and CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text:
+            return True
+        
+        return False
 
     def change_cities_and_search_profiles(self):
         """ Iterate through cities to search for cofounders. """

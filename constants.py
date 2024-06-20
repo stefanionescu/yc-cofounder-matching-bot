@@ -26,9 +26,10 @@ FOUNDER_INTRO = "//span[text()='Intro']/following-sibling::div[1]"
 FOUNDER_LIFE_STORY = "//span[text()='Life Story']/following-sibling::div[1]"
 FOUNDER_FREE_TIME = "//span[text()='Free Time']/following-sibling::div[1]"
 FOUNDER_OTHER_INFO = "//span[text()='Other']/following-sibling::div[1]"
+FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH = "//body//div[@class='navigation-parent']//div[@class='css-nzfpbh efk6n0y0']//div[@class='css-nzfpbh efk6n0y0']//p[1]"
 
 # CSS Paths for Text Element
-DASHBOARD_LIMIT_NOTICE_BOX = "div[class='css-1czqf2r e13d1soq2'] div div"
+DASHBOARD_LIMIT_NOTICE_BOX = "div[class='css-1czqf2r e13d1soq2'] div:nth-child(1)"
 FOUNDER_POTENTIAL_IDEAS = "body > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1)"
 
 # IDs and Class Names for Form Elements
@@ -43,8 +44,8 @@ MY_PROFILE_PAGE_URL_PAGE_ONE = "?page=1"
 # Text Constants for Validation and Errors
 FIX_ERRORS_STRING = "Please fix the errors below before continuing."
 COULD_NOT_FIND_CITY_STRING = "Could not identify this location"
-DASHBOARD_WEEKLY_LIMIT_NOTICE = "You can keep skipping or hiding profiles, but cannot send any more invites"
-FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE = "You can keep skipping or hiding profiles, but cannot send any more invites. Check back on Monday when invites refresh!"
+DASHBOARD_WEEKLY_LIMIT_NOTICE = "You can continue to view and hide profiles, but will not be able to send any more invites"
+FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE = "You can keep skipping or hiding profiles, but cannot send any more invites"
 
 # GPT Instructions
 CHAT_GPT_SYSTEM_PERSONA = "You answer all queries either with {'output': 'Pass'} or {'output': 'Fail'} depending on how you are prompted"

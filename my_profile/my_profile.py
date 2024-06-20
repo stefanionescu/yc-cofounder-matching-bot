@@ -79,8 +79,9 @@ class MyProfile():
         if self.driver.current_url != CONSTANTS.STARTUP_SCHOOL_DASHBOARD_URL:
             # TODO: log this to email
             return True
-        
+
         weekly_limit_box = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.DASHBOARD_LIMIT_NOTICE_BOX)
+
         if len(weekly_limit_box) != 1: 
             # TODO: log to email
             return True
