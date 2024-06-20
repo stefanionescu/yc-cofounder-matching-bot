@@ -12,11 +12,11 @@ class MyProfile():
         current_location_field = self.driver.find_elements(By.NAME, CONSTANTS.MY_PROFILE_CURRENT_LOCATION)
         submit_button = self.driver.find_elements(By.XPATH, CONSTANTS.MY_PROFILE_SUBMIT_BUTTON)
 
-        if not current_location_field or len(current_location_field) == 0 or len(submit_button) != 3:
+        if not current_location_field or len(current_location_field) != 1 or len(submit_button) != 3:
             print("Location input field or submit button could not be found")
             return False
         
-        if current_location_field[0].text == city_name:
+        if current_location_field[0].get_attribute('value') == city_name:
             return True # No change needed
 
         self.update_city_field(city_name)

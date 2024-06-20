@@ -22,7 +22,6 @@ class SignIn():
 
         # Fill in credentials and submit form
         self.fill_and_submit_form(userid_field, pass_field, sign_in_btn)
-        print("url after sign in: " + self.driver.current_url)
         return True
 
     def fill_and_submit_form(self, userid_field, pass_field, sign_in_btn):

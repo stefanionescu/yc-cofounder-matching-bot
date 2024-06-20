@@ -17,6 +17,7 @@ FOUNDER_SKIP_PROFILE_BUTTON = "//div//button[text()='Skip for now']"
 FOUNDER_SEE_NEXT_PROFILE_BUTTON = "//div//button[text()='See next profile']"
 FOUNDER_SAVE_TO_FAVORITES = "//div[text()='Save to favorites']"
 FOUNDER_YC_ALUM_TAG_TEXT = "YC Alum ("
+FOUNDER_CURRENTLY_IN_YC_TEXT = "Current YC Founder ("
 FOUNDER_YC_ALUM_TAG_FIELD = "//p//div//span[starts-with(., 'YC Alum (')]"
 FOUNDER_SHARED_INTERESTS_SPAN = "//span[text()='Our shared interests']/following-sibling::div[1]/span"
 FOUNDER_IMPRESSIVE_ACCOMPLISHMENT = "//span[text()='Impressive accomplishment']/following-sibling::div[1]"
@@ -55,7 +56,7 @@ CHAT_GPT_PROMPT_FIVE = "Here are the founder's notable accomplishments: {impress
 CHAT_GPT_PROMPT_SIX = "Here are some potential startup ideas the founder has: {potential_ideas}."
 PROMPT_QUESTIONS_SECTION = "My Questions: "
 PROMPT_ENDING = "Your answer must be formatted exactly like this: {'output': 'Pass'} or {'output': 'Fail'}. You say {'output': 'Pass'} if the answer for at least one of the questions I asked is Yes. You say {'output': 'Fail'} if the answer for at least one of the questions I asked is No."
-GPT_MODEL = "gpt-4o-2024-05-13"
+GPT_MODEL = "gpt-4-turbo"
 GPT_MAX_TOKENS = 25
 GPT_TEMPERATURE = 0
 GPT_ANSWER_PASS = "'output': 'Pass'"

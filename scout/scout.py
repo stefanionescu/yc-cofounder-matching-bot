@@ -1,5 +1,4 @@
 import os
-import sys
 from time import time
 import constants as CONSTANTS
 from dotenv import load_dotenv
@@ -49,7 +48,7 @@ class Scout:
     def still_have_time(self):
         """ Check if there is still time to perform operations based on max run time. """
         return self.check_elapsed_time(self.bot_max_run_time) and self.check_elapsed_time(CONSTANTS.MAX_POSSIBLE_ELAPSED_TIME)
-    
+
     def go_to_discover(self):
         """ Navigate to the Discover page and verify if navigation was successful. """
         try:
@@ -66,7 +65,9 @@ class Scout:
         try:
             # Directly search for the specific text or markers
             yc_alum_tag = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_YC_ALUM_TAG_FIELD)
-            if any(CONSTANTS.FOUNDER_YC_ALUM_TAG_TEXT in elem.text for elem in yc_alum_tag):
+            former_yc_founder = any(CONSTANTS.FOUNDER_YC_ALUM_TAG_TEXT in elem.text for elem in yc_alum_tag)
+            current_yc_founder = any(CONSTANTS.FOUNDER_CURRENTLY_IN_YC_TEXT in elem.text for elem in yc_alum_tag)
+            if former_yc_founder or current_yc_founder:
                 return True
             return False
         except Exception as e:
@@ -120,40 +121,40 @@ class Scout:
         if not profile_info:
             print("Profile information is incomplete.")
             return None, False
-        
+
         prompt_text = self.generate_gpt_prompt(profile_info)
-        print("gpt prompt:")
-        print(prompt_text)
         if not prompt_text:
             print("Failed to generate a valid GPT prompt.")
             return None, False
-        
+
         try:
             response = self.call_gpt_api(prompt_text)
-            print("The GPT response is:")
-            print(response)
             return self.interpret_gpt_response(response)
         except Exception as e:
             print(f"Failed to call GPT API: {e}")
             return None, False
-    
+
     def call_gpt_api(self, prompt):
         """ Send a prompt to the GPT API and return the response. """
-        from openai import Completion
-        return Completion.create(
-            engine=CONSTANTS.GPT_MODEL,
-            prompt=prompt,
+        from openai import OpenAI
+        
+        client = OpenAI()
+        return client.chat.completions.create(model=CONSTANTS.GPT_MODEL,
+            messages=[
+                {"role": "system", "content": CONSTANTS.CHAT_GPT_SYSTEM_PERSONA},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=CONSTANTS.GPT_MAX_TOKENS,
             temperature=CONSTANTS.GPT_TEMPERATURE,
             top_p=1
         )
-    
+
     def interpret_gpt_response(self, response):
         """ Interpret GPT's response to determine the next step. """
-        if 'choices' not in response or not response['choices']:
+        if not response.choices or not response.choices[0] or not response.choices[0].message:
             print("No valid response from GPT.")
             return None, False
-        answer = response['choices'][0].text.strip()
+        answer = response.choices[0].message.content.strip()
         return answer, CONSTANTS.GPT_ANSWER_PASS in answer
 
     def generate_gpt_prompt(self, profile_info):
@@ -205,7 +206,7 @@ class Scout:
         except Exception as e:
             print(f"Failed to contact founder: {e}")
             return False
-        
+
     def skip_founder(self):
         """ Skip the current founder profile. """
         try:
@@ -221,10 +222,13 @@ class Scout:
     def save_founder(self):
         """ Save the current founder profile to favorites. """
         try:
-            save_button = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_SAVE_TO_FAVORITES)
-            next_button = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_SEE_NEXT_PROFILE_BUTTON)
-            save_button.click()
+            save_button = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_SAVE_TO_FAVORITES)
+            if len(save_button) != 3:
+                # TODO: log to email
+                return False
+            save_button[1].click()
             utils.random_short_sleep()
+            next_button = self.driver.find_element(By.XPATH, CONSTANTS.FOUNDER_SEE_NEXT_PROFILE_BUTTON)
             next_button.click()
             utils.random_normal_sleep()
             self.saved_founders += 1
@@ -284,6 +288,7 @@ class Scout:
 
         while self.still_have_time() and self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
             if not self.process_current_profile():
+                # TODO: check if the current profile ID in the URL is different than the previous one; if they are identical, we need to stop execution
                 continue  # Skip to next profile if current one is not processed
         return True
 
