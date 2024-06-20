@@ -6,7 +6,7 @@ from utils.utils import Utils as utils
 from selenium.webdriver.common.by import By
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
-from logging.logging import Logging
+from email_logging.email_logging import EmailLogging
 
 class Scout:
     def __init__(self, driver):
@@ -14,7 +14,7 @@ class Scout:
         self.driver = driver
         self.bot_start_time = time()
         self.initialize_environment()
-        self.email_logging = Logging()
+        self.email_logging = EmailLogging()
 
     def log_message(self, hit_weekly_limit, bot_error):
         final_error = None if bot_error == "" else str(bot_error)

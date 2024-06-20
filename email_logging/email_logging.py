@@ -4,7 +4,7 @@ from yagmail import SMTP
 import constants as CONSTANTS
 from dotenv import load_dotenv
 
-class Logging():
+class EmailLogging():
     def __init__(self):
         load_dotenv()
 
@@ -27,6 +27,8 @@ class Logging():
             saved_founders_breakdown,
             skipped_founders
         ):
+        print("LOGGING: Creating the report...")
+
         report = self.create_scraping_report(
             hit_weekly_limit, 
             bot_error, 
@@ -37,6 +39,9 @@ class Logging():
             saved_founders_breakdown, 
             skipped_founders
         )
+
+        print(report)
+
         self.send_email(report)
 
     def create_scraping_report(
@@ -50,7 +55,7 @@ class Logging():
             saved_founders_breakdown,
             skipped_founders
         ):
-        if not isinstance(skipped_cities, list):
+        if skipped_cities is not None and not isinstance(skipped_cities, list):
             print("LOGGING: Invalid skipped_cities var.")
             sys.exit(0)
 

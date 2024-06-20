@@ -1,5 +1,4 @@
 import os
-from time import time 
 from scout.scout import Scout
 import constants as CONSTANTS
 from selenium import webdriver
@@ -10,7 +9,7 @@ from proxy.extension import proxies
 from utils.utils import Utils as utils
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
-from logging.logging import Logging as custom_log
+from email_logging.email_logging import EmailLogging
 from selenium.webdriver.chrome.options import Options
 
 def setup_chrome_driver():
@@ -114,6 +113,7 @@ def log_into_account(driver):
     Log into a YC account using provided WebDriver. Returns True if login successful, else False.
     """
     sign_in = SignIn(driver)
+
     if not sign_in.go_to_sign_in() or not sign_in.sign_in():
         print("GET_COFOUNDER: Failed to navigate to sign-in page or log in.")
         log_message(None, "Failed to navigate to sign-in page or log in.")
@@ -121,7 +121,8 @@ def log_into_account(driver):
 
     my_profile = MyProfile(driver)
     hit_limit = my_profile.check_dashboard_weekly_limit_reached()
-    if hit_limit: log_message(True, None)
+
+    if not hit_limit: log_message(True, None)
     return hit_limit
 
 def find_cofounders(driver):
@@ -132,7 +133,8 @@ def find_cofounders(driver):
     cofounder_scout.find_cofounders()
 
 def log_message(hit_weekly_limit, bot_error):
-    custom_log.log_report_to_email(hit_weekly_limit, bot_error, None, None, None, None, None, None)
+    email_logging = EmailLogging() 
+    email_logging.log_report_to_email(hit_weekly_limit, bot_error, None, None, None, None, None, None)
 
 def main():
     """
