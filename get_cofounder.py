@@ -122,7 +122,9 @@ def log_into_account(driver):
     my_profile = MyProfile(driver)
     hit_limit = my_profile.check_dashboard_weekly_limit_reached()
 
-    if not hit_limit: log_message(True, None)
+    if not hit_limit: 
+        print("GET_COFOUNDER: Hit the weekly limit for cofounder matching.")
+        log_message(True, None)
     return hit_limit
 
 def find_cofounders(driver):
@@ -156,7 +158,6 @@ def main():
         print("GET_COFOUNDER: Logging in...")
         login_output = log_into_account(driver)
         if not login_output:
-            print("GET_COFOUNDER: Could not log into YC Cofounder Matching.")
             return
 
         print("GET_COFOUNDER: Starting the cofounder search...")

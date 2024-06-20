@@ -330,6 +330,7 @@ class Scout:
                 continue  # Skip to next profile if current one is not processed
         
         if self.hit_weekly_limit():
+            print("SCOUT: Hit the weekly limit for cofounder matching.")
             self.log_message(True, "")
             
         return True

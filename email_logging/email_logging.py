@@ -1,8 +1,9 @@
 import os
 import sys
-from yagmail import SMTP
+import sendgrid
 import constants as CONSTANTS
 from dotenv import load_dotenv
+from sendgrid.helpers.mail import Mail, Email, To, Content
 
 class EmailLogging():
     def __init__(self):
@@ -12,9 +13,24 @@ class EmailLogging():
         if not report:
             print("LOGGING: Cannot email a null report.")
             sys.exit(0)
-            return
-        yag = SMTP(os.getenv("EMAIL_FROM"), os.getenv("EMAIL_FROM_PASSWORD"))
-        yag.send(to = os.getenv("EMAIL_TO"), subject = CONSTANTS.REPORT_TITLE, contents = report.strip())
+
+        sg = sendgrid.SendGridAPIClient(api_key=os.getenv('SENDGRID_API_KEY'))
+        from_email = Email(os.getenv("EMAIL_FROM"))
+        to_email = To(os.getenv("EMAIL_TO"))
+        subject = CONSTANTS.REPORT_TITLE
+        content = Content("text/plain", str(report))
+        mail = Mail(from_email, to_email, subject, content)
+
+        # Get a JSON-ready representation of the Mail object
+        mail_json = mail.get()
+
+        # Send an HTTP POST request to /mail/send
+        response = sg.client.mail.send.post(request_body=mail_json)
+
+        if response.status_code and (str(response.status_code) == "200" or str(response.status_code) == "202"):
+            print("LOGGING: Report sent!")
+        else:
+            print("LOGING: Failed to send the report")
 
     def log_report_to_email(
             self, 
@@ -39,8 +55,6 @@ class EmailLogging():
             saved_founders_breakdown, 
             skipped_founders
         )
-
-        print(report)
 
         self.send_email(report)
 
