@@ -99,7 +99,7 @@ def check_general_vars():
     if contact_founders and not 0 < int(max_founders_to_contact) or contact_founders and len(founder_messages) == 0:
         print("GET_COFOUNDER: Invalid founders contact setup.")
         return False
-    if shared_interests[0] == "" or (len(shared_interests) != len(founder_messages)):
+    if len(shared_interests) == 0 or shared_interests[0] == "" or (len(shared_interests) != len(founder_messages)):
         print("GET_COFOUNDER: Invalid shared interests.")
         return False
     if email_from == "" or email_from_password == "" or email_to == "":
