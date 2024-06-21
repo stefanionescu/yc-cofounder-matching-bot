@@ -71,7 +71,7 @@ founder_messages = []
 
 ### Profile Data the Bot Analyzes
 
-The bot always checks the `Our shared interests` section to determine if a cofounder is a potential fit. If you set `ANALYZE_PROFILES_WITH_GPT` to `true`, the bot will use information from `Intro`, `Life Story`, `Free Time`, `Other`, `Impressive accomplishment`, `Equity expectations` and `Potential ideas` to check for cofounder compatibility.
+The bot always checks the `Our shared interests` section to determine if a cofounder is a potential fit. If you set `ANALYZE_PROFILES_WITH_GPT` to `true`, the bot will also use information from `Intro`, `Life Story`, `Free Time`, `Other`, `Impressive accomplishment`, `Equity expectations` and `Potential ideas` to check for cofounder compatibility.
 
 ### Run the Bot
 
