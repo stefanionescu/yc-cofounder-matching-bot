@@ -69,16 +69,16 @@ If you want the bot to message founders, create a file called `founder_messages.
 founder_messages = []
 ```
 
-### Profile Data the Bot Analyzes
+### Founder Profile Data
 
 The bot always checks the `Our shared interests` section to determine if a cofounder is a potential fit. If you set `ANALYZE_PROFILES_WITH_GPT` to `true`, the bot will also use information from `Intro`, `Life Story`, `Free Time`, `Other`, `Impressive accomplishment`, `Equity expectations` and `Potential ideas` to check for cofounder compatibility.
 
-### Run the Bot
+### Run the Bot
 
 The simplest way to run the bot is to execute the following:
 
 ```
-python get_cofounder.py
+python<version> get_cofounder.py
 ```
 
 If you want to see the bot interact with the browser, comment the following lines from [`get_cofounder.py`](./get_cofounder.py):
