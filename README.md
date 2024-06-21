@@ -54,9 +54,47 @@ You'll need to create a `.env` file and place it at the root of the directory. I
 - `ANALYZE_PROFILES_WITH_GPT`: `true` or `false`. Whether the bot will use GPT to analyze founder profiles and determine if they are a fit or not
 - `OPENAI_API_KEY`: your OpenAI API key, in case you want to use GPT for your cofounder search
 - `CHAT_GPT_ORGANIZATION` and `CHAT_GPT_PROJECT_ID`: your GPT org and project IDs
-- `CHAT_GPT_QUESTIONS`: questions that you want GPT to answer about a profile in order to determine if the bot should save or contact a founder. **Each question must be answered with yes or no**. An example of a good question is `"Does this person already have experience working at a startup?"`. An example of a bad question is: `"How many year of experience does this person have?"`
+- `CHAT_GPT_QUESTIONS`: questions that you want GPT to answer about a profile in order to determine if the bot should save or contact a founder. **GPT must be be able to answer each question with a simple yes or no**. An example of a good question is `"Does this person already have experience working at a startup?"`. An example of a bad question is: `"How many year of experience does this person have?"`
 - `EMAIL_FROM`, `EMAIL_FROM_PASSWORD`, `EMAIL_TO`: sender and receiver data used by the bot to send you reports after it's done searching
 - `SENDGRID_API_KEY`: the bot uses SendGrid to send you emails. Sign up for a free SendGrid API key [here](https://signup.sendgrid.com/)
 
 For more details about environment variables, check the [example file](./.env.example).
 
+### Founder Messages
+Before you run the bot and start to contact founders, check [this comment](https://github.com/stefanionescu/yc-cofounder-matching-bot/blob/6d0bd4c32fa20581de7fc0112b93a7dcfde7f4f2/example_founder_messages.py#L2) from `example_founder_messages.py`. The position of each message inside `founder_messages` is linked to the position of each shared interest group from `IMPORTANT_SHARED_INTERESTS`. Make sure to match messages and interest groups properly.
+
+If you want the bot to message founders, create a file called `founder_messages.py` at the root of the project and place your messages in it, similar to how it's done in [`example_founder_messages.py`](./example_founder_messages.py). Otherwise, put the following code in `founder_messages.py`:
+
+```
+founder_messages = []
+```
+
+### Profile Data the Bot Analyzes
+
+The bot always checks the `Our shared interests` section to determine if a cofounder is a potential fit. If you set `ANALYZE_PROFILES_WITH_GPT` to `true`, the bot will use information from `Intro`, `Life Story`, `Free Time`, `Other`, `Impressive accomplishment`, `Equity expectations` and `Potential ideas` to check for cofounder compatibility.
+
+### Run the Bot
+
+The simplest way to run the bot is to execute the following:
+
+```
+python get_cofounder.py
+```
+
+If you want to see the bot interact with the browser, comment the following lines from [`get_cofounder.py`](./get_cofounder.py):
+
+```
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--headless=new')
+chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--disable-infobars')
+chrome_options.add_experimental_option("useAutomationExtension", False)
+```
+
+In order to run the bot with Docker, execute the following:
+
+```
+docker build -t yc-cofounder-matching-bot .
+docker run -it yc-cofounder-matching-bot
+```
