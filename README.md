@@ -31,7 +31,8 @@ source venv/bin/activate
 
 You should now be inside your virtual environment. You can install all the bot dependencies using:
 
-```pip<version> install -r requirements.txt
+```
+pip<version> install -r requirements.txt
 ```
 
 ### Environment Variables
