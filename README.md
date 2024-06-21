@@ -46,7 +46,7 @@ You'll need to create a `.env` file and place it at the root of the directory. I
 - `YC_USERNAME` and `YC_PASSWORD`: the username and password you use to log into YC Cofounder Matching
 - `YC_CITIES`: a list of cities separated by semicolons. These are all the cities that the bot will loop through, from left to right, and search for cofounders. **Make sure to write each city name exactly like you see it on your Cofounder Matching profile section**. You can search for cities under My Profile > Basics > Location. Also, pro tip: you can omit this environment var and the bot will only search for founders in the current Location you set for your profile
 - `CITY_TO_RETURN_TO`: this is the city your profile will be set to after the bot finishes searching for cofounders
-- `BOT_MAX_RUN_TIME`: this the the max amount of time (in seconds) that the bot will search for. Set this to a value anywhere between `600` (10 minutes) and `1500` (25 minutes)
+- `BOT_MAX_RUN_TIME`: this is the max amount of time (in seconds) that the bot will search for. Set this to a value anywhere between `600` (10 minutes) and `1500` (25 minutes)
 - `CONTACT_COFOUNDERS`: `true` or `false`. Determines whether the bot will send messages to cofounders that it deems as a good fit. If this is set to `false`, the bot will save promising profiles under Revisit Profiles > Saved Profiles so you can check them out later
 - `MAX_PROFILES_TO_CONTACT`: this is the max number of promising cofounders that the bot will contact in a single run. You can set this to a more conservative value (less than 20) in case you want to double-check profiles before you reach out. **NOTE** that if the bot finds a promising profile and it cannot contact founders anymore, it will save the profile under Revisit Profiles > Saved Profiles
 - `SKIP_YC_ALUMNI`: `true` or `false`. A flag that tells the bot whether it should skip founders who already went through YC
@@ -54,8 +54,8 @@ You'll need to create a `.env` file and place it at the root of the directory. I
 - `ANALYZE_PROFILES_WITH_GPT`: `true` or `false`. Whether the bot will use GPT to analyze founder profiles and determine if they are a fit or not
 - `OPENAI_API_KEY`: your OpenAI API key, in case you want to use GPT for your cofounder search
 - `CHAT_GPT_ORGANIZATION` and `CHAT_GPT_PROJECT_ID`: your GPT org and project IDs
-- `CHAT_GPT_QUESTIONS`: questions that you want GPT to answer about a profile in order to determine if the bot should save or contact a founder. **GPT must be be able to answer each question with a simple yes or no**. An example of a good question is `"Does this person already have experience working at a startup?"`. An example of a bad question is: `"How many year of experience does this person have?"`
-- `EMAIL_FROM`, `EMAIL_FROM_PASSWORD`, `EMAIL_TO`: sender and receiver data used by the bot to send you reports after it's done searching
+- `CHAT_GPT_QUESTIONS`: questions that you want GPT to answer about a profile in order to determine if the bot should save or contact a founder. **GPT must be be able to answer each question with a simple yes or no**. An example of a good question is `"Does this person already have experience working at a startup?"`. An example of a bad question is: `"How many years of experience does this person have?"`
+- `EMAIL_FROM`, `EMAIL_FROM_PASSWORD`, `EMAIL_TO`: sender and receiver data used by the bot to send reports to your email after it's done searching
 - `SENDGRID_API_KEY`: the bot uses SendGrid to send you emails. Sign up for a free SendGrid API key [here](https://signup.sendgrid.com/)
 
 For more details about environment variables, check the [example file](./.env.example).
