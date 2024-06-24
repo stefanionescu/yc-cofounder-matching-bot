@@ -23,9 +23,7 @@ class Scout:
             final_error, 
             self.skipped_cities_list, 
             self.contacted_founders if self.contacted_founders > 0 else None, 
-            self.contacted_founders_breakdown,
-            self.saved_founders if self.saved_founders > 0 else None, 
-            self.saved_founders_breakdown,
+            self.saved_founders if self.saved_founders > 0 else None,
             self.skipped_founders if self.skipped_founders > 0 else None
         )
         sys.exit(0)
@@ -51,8 +49,6 @@ class Scout:
         self.contacted_founders = 0
         self.skipped_founders = 0
         self.saved_founders = 0
-        self.saved_founders_breakdown = {}
-        self.contacted_founders_breakdown = {}
         self.skipped_cities_list = []
 
     def check_elapsed_time(self, time_limit):
@@ -151,7 +147,7 @@ class Scout:
         if not prompt_text:
             print("SCOUT: Failed to generate a valid GPT prompt.")
             return None, False
-
+        
         try:
             response = self.call_gpt_api(prompt_text)
             return self.interpret_gpt_response(response)
@@ -258,7 +254,7 @@ class Scout:
         try:
             save_button = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_SAVE_TO_FAVORITES)
             if len(save_button) != 3:
-                # TODO: log to email
+                self.log_message(False, "Couldn't save founder profile.")
                 return False
             save_button[1].click()
             utils.random_short_sleep()
@@ -304,7 +300,6 @@ class Scout:
                 break
             if not self.change_city_and_search(city):
                 print(f"SCOUT: Failed to process profiles for city: {city}")
-                self.skipped_cities_list.append(city)
 
     def change_city_and_search(self, city):
         """ Change to a specific city and search for profiles. """
@@ -318,6 +313,7 @@ class Scout:
         """ Complete the search process by returning to the preferred city. """
         if not self.go_back_to_preferred_city():
             print("SCOUT: Failed to return to preferred city.")
+        self.log_message(False, "")
 
     def search_profiles(self):
         """ Navigate and process profiles on the Discover page. """
@@ -328,24 +324,23 @@ class Scout:
             if not self.process_current_profile():
                 # TODO: check if the current profile ID in the URL is different than the previous one; if they are identical, we need to stop execution
                 continue  # Skip to next profile if current one is not processed
-        
-        if self.hit_weekly_limit():
-            print("SCOUT: Hit the weekly limit for cofounder matching.")
-            self.log_message(True, "")
             
         return True
 
     def process_current_profile(self):
         """ Process an individual founder's profile and determine actions based on profile data. """
         if self.skip_yc_alumni and self.is_yc_alumn():
+            print("SCOUT: Skipping the profile because it's from a YC alumn...")
             return self.skip_founder()
 
         profile_info = self.get_profile_info()
         if not profile_info or profile_info["shared_interests"] == set():
+            print("SCOUT: Can't extract all the info I need from this profile so I'm skipping...")
             return self.skip_founder() # Skip profile if no or incomplete info was extracted
 
         interest_group = self.important_interests_match(profile_info['shared_interests'])
         if interest_group == -1:
+            print("SCOUT: No interests in common with this founder, skipping...")
             return self.skip_founder()
 
         return self.evaluate_and_act_on_profile(profile_info, interest_group)
@@ -353,29 +348,49 @@ class Scout:
     def evaluate_and_act_on_profile(self, profile_info, interest_group):
         """ Evaluate profile with or without GPT and act accordingly (contact/save). """
         if self.analyze_profile_with_gpt and self.gpt_questions:
+            print("SCOUT: Analyzing the profile with GPT...")
             return self.handle_profile_with_gpt(profile_info, interest_group)
+        print("SCOUT: Analyzing the profile...")
         return self.default_profile_handling(interest_group)
 
     def handle_profile_with_gpt(self, profile_info, interest_group):
         """ Use GPT to analyze the profile and decide on further actions. """
         gpt_analysis = self.analyze_with_gpt(profile_info)
-        if not gpt_analysis[1]:  # GPT does not recommend contacting
+        if not gpt_analysis[1]:
+            print("SCOUT: GPT said I shouldn't contact this founder so for now I'm saving the profile.")
             return self.save_founder()
         return self.default_profile_handling(interest_group)
 
     def default_profile_handling(self, interest_group):
         """ Handle profile based on the system settings without GPT analysis. """
         if self.contact_founders_flag and self.contacted_founders < self.max_founders_to_contact:
+            print("SCOUT: Contacting the founder...")
             return self.contact_founder(interest_group)
+        print("SCOUT: Saving this founder profile...")
         return self.save_founder()
 
     def hit_weekly_limit(self):
-        limit_paragraph = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH)
-        if len(limit_paragraph) != 1:
-            # TODO: log to email
-            return True
-        if limit_paragraph[0].is_displayed() and CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text:
-            return True
+        limit_paragraph = []
+
+        if self.driver.current_url == CONSTANTS.STARTUP_SCHOOL_DASHBOARD_URL:
+            limit_paragraph = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.DASHBOARD_LIMIT_NOTICE_BOX)
+
+            if len(limit_paragraph) != 1:
+                self.log_message(False, "Couldn't check if I hit the weekly limit.")
+                return True
+            
+            if limit_paragraph[0].is_displayed() and CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text:
+                return True
+
+        elif self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
+            limit_paragraph = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH)
+
+            if len(limit_paragraph) != 1:
+                self.log_message(False, "Couldn't check if I hit the weekly limit.")
+                return True
+
+            if limit_paragraph[0].is_displayed() and CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text:
+                return True
         
         return False
 

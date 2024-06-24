@@ -19,9 +19,11 @@ class MyProfile():
         if current_location_field[0].get_attribute('value') == city_name:
             return True # No change needed
 
+        print("MY_PROFILE: Updating the city field to " + city_name + "...")
         self.update_city_field(city_name)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         utils.random_short_sleep()
+        print("MY_PROFILE: Clicking on the save button...")
         submit_button[0].click()
         utils.random_long_sleep()
 
@@ -34,6 +36,7 @@ class MyProfile():
         utils.random_short_sleep()
 
     def check_city_update_success(self, city_name):
+        print("MY_PROFILE: Checking if the city update was successful...")
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
         if CONSTANTS.FIX_ERRORS_STRING not in soup.get_text():
             return True
@@ -41,6 +44,7 @@ class MyProfile():
         return False
 
     def go_to_first_profile_tab(self):
+        print("MY_PROFILE: Going to the first profile tab...")
         basics_button = self.driver.find_elements(By.XPATH, CONSTANTS.MY_PROFILE_BASICS_BUTTON)
         if len(basics_button) == 1:
             basics_button[0].click()
@@ -67,6 +71,7 @@ class MyProfile():
         return False
 
     def navigate_to_profile(self):
+        print("MY_PROFILE: Navigating to the profile section...")
         my_profile = self.driver.find_elements(By.XPATH, CONSTANTS.DASHBOARD_MY_ACCOUNT_MENU_OPTION)
         if len(my_profile) == 1:
             my_profile[0].click()
@@ -77,13 +82,11 @@ class MyProfile():
     
     def check_dashboard_weekly_limit_reached(self):
         if self.driver.current_url != CONSTANTS.STARTUP_SCHOOL_DASHBOARD_URL:
-            # TODO: log this to email
             return True
 
         weekly_limit_box = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.DASHBOARD_LIMIT_NOTICE_BOX)
 
         if len(weekly_limit_box) != 1: 
-            # TODO: log to email
             return True
         if CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE in weekly_limit_box[0].text:
             return False

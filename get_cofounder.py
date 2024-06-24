@@ -27,12 +27,12 @@ def add_chrome_options(chrome_options):
     """
     Adds necessary Chrome options for the browser.
     """
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--headless=new')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--disable-infobars')
-    chrome_options.add_experimental_option("useAutomationExtension", False)
+    # chrome_options.add_argument('--no-sandbox')
+    # chrome_options.add_argument('--headless=new')
+    # chrome_options.add_argument('--disable-dev-shm-usage')
+    # chrome_options.add_argument('--disable-gpu')
+    # chrome_options.add_argument('--disable-infobars')
+    # chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument('--enable-logging')
     chrome_options.add_argument('--v=1')
     chrome_options.add_argument('--log-level=0')
@@ -75,9 +75,9 @@ def check_general_vars():
     """
     max_runtime = os.getenv("BOT_MAX_RUN_TIME", 1)
     use_gpt = os.getenv("ANALYZE_PROFILES_WITH_GPT", "false").lower() == "true"
-    gpt_key = os.getenv("CHAT_GPT_API_KEY", "")
+    gpt_key = os.getenv("OPENAI_API_KEY", "")
     gpt_org = os.getenv("CHAT_GPT_ORGANIZATION", "")
-    gpt_project_id = os.getenv("CHAT_GPT_PROJECT_ID", "")
+    gpt_project_id = os.getenv("CHAT_GPT_PROJECT", "")
     city_to_return_to = os.getenv("CITY_TO_RETURN_TO", "")
     contact_founders = os.getenv("CONTACT_FOUNDERS", "false").lower() == "true"
     max_founders_to_contact = os.getenv("MAX_FOUNDERS_TO_CONTACT", 0)
@@ -93,10 +93,10 @@ def check_general_vars():
     if not max_runtime or not 600 <= int(max_runtime) <= 1500:
         print("GET_COFOUNDER: Invalid max runtime.")
         return False
-    if use_gpt and (not gpt_key or gpt_key != "") and (not gpt_org or gpt_org != "") and (not gpt_project_id or gpt_project_id != ""):
+    if use_gpt and (gpt_key == "" or gpt_org == "" or gpt_project_id == ""):
         print("GET_COFOUNDER: Invalid GPT params.")
         return False
-    if contact_founders and not 0 < int(max_founders_to_contact) or contact_founders and len(founder_messages) == 0:
+    if (contact_founders and not 0 < int(max_founders_to_contact)) or (contact_founders and len(founder_messages)) == 0:
         print("GET_COFOUNDER: Invalid founders contact setup.")
         return False
     if len(shared_interests) == 0 or shared_interests[0] == "" or (len(shared_interests) != len(founder_messages)):
