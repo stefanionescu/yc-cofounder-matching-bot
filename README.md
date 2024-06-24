@@ -54,7 +54,7 @@ You'll need to create a `.env` file and place it at the root of the directory. I
 - `ANALYZE_PROFILES_WITH_GPT`: `true` or `false`. Whether the bot will use GPT to analyze founder profiles and determine if they are a fit or not
 - `OPENAI_API_KEY`: your OpenAI API key, in case you want to use GPT for your cofounder search
 - `CHAT_GPT_ORGANIZATION` and `CHAT_GPT_PROJECT_ID`: your GPT org and project IDs
-- `CHAT_GPT_QUESTIONS`: questions that you want GPT to answer about a profile in order to determine if the bot should save or contact a founder. **GPT must be be able to answer each question with a simple yes or no**. An example of a good question is `"Does this person already have experience working at a startup?"`. An example of a bad question is: `"How many years of experience does this person have?"`
+- `CHAT_GPT_QUESTIONS`: questions that you want GPT to answer about a profile in order to determine if the bot should save or contact a founder. **GPT must be be able to answer each question with a simple yes or no**. An example of a good question is `"Does this person have less than 3 years of coding/programming experience?"`. An example of a bad question is: `"How many years of experience does this person have?"`. If GPT answers at least one question with Yes, it will save the founder's profile. If, instead, GPT answers all questions with No (and if you allow the bot to contact founders), it will contact the founder.
 - `EMAIL_FROM`, `EMAIL_FROM_PASSWORD`, `EMAIL_TO`: sender and receiver data used by the bot to send reports to your email after it's done searching
 - `SENDGRID_API_KEY`: the bot uses SendGrid to send you emails. Sign up for a free SendGrid API key [here](https://signup.sendgrid.com/)
 
