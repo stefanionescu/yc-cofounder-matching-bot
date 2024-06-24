@@ -3,6 +3,7 @@
 venv
 .DS_Store
 proxies_extension.zip
+cookies.json
 
 __pycache__
 my_profile/__pycache__
