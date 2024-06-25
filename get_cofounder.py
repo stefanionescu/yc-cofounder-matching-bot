@@ -135,7 +135,7 @@ def find_cofounders(driver):
 
 def log_message(hit_weekly_limit, bot_error):
     email_logging = EmailLogging() 
-    email_logging.log_report_to_email(hit_weekly_limit, bot_error, None, None, None, None, None, None)
+    email_logging.log_report_to_email(hit_weekly_limit, bot_error, None, None, None, None)
 
 def main():
     """

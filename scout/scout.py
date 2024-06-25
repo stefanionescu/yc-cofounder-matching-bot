@@ -65,6 +65,7 @@ class Scout:
 
     def go_to_discover(self):
         """ Navigate to the Discover page and verify if navigation was successful. """
+        print("Going to the discover page...")
         try:
             discover = self.driver.find_element(By.XPATH, CONSTANTS.DASHBOARD_DISCOVER_MENU_OPTION)
             discover.click()

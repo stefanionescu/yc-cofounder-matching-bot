@@ -2,6 +2,7 @@ import os
 import sys
 import sendgrid
 import constants as CONSTANTS
+from datetime import datetime
 from dotenv import load_dotenv
 from sendgrid.helpers.mail import Mail, Email, To, Content
 
@@ -14,10 +15,12 @@ class EmailLogging():
             print("LOGGING: Cannot email a null report.")
             sys.exit(0)
 
+        today = datetime.now()
+
         sg = sendgrid.SendGridAPIClient(api_key=os.getenv('SENDGRID_API_KEY'))
         from_email = Email(os.getenv("EMAIL_FROM"))
         to_email = To(os.getenv("EMAIL_TO"))
-        subject = CONSTANTS.REPORT_TITLE
+        subject = CONSTANTS.REPORT_TITLE.format(date=today.strftime('%d/%m/%y'))
         content = Content("text/plain", str(report))
         mail = Mail(from_email, to_email, subject, content)
 

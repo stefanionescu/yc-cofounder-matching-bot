@@ -70,7 +70,7 @@ CANNOT_CALL_GPT = "Could not call GPT API"
 EMPTY_PROFILE_INFO = "Profile info is empty"
 
 # Emails
-REPORT_TITLE = "Today's YC Cofounder Scraping Report"
+REPORT_TITLE = "YC Cofounder Search Report - {date}"
 REPORT_INTRO = "Hi, here's today's YC Cofounder scraping report:\n\n"
 REPORT_WEEKLY_LIMIT_REACHED = "I've hit the weekly limit to contact founders.\n\n"
 REPORT_BOT_ERROR = "I got the following error when trying to scrape: {bot_error}\n\n"
