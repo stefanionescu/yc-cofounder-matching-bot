@@ -31,7 +31,6 @@ def add_chrome_options(chrome_options):
     chrome_options.add_argument('--headless=new')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
-    # chrome_options.add_argument('--disable-infobars')
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument('--enable-logging')
     chrome_options.add_argument('--v=1')
