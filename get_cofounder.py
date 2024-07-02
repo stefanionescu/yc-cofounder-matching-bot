@@ -73,6 +73,7 @@ def check_general_vars():
     Validate general bot settings from environment variables.
     """
     max_runtime = os.getenv("BOT_MAX_RUN_TIME", 1)
+    search_after_limit = os.getenv("SEARCH_WHEN_LIMIT_REACHED", "false").lower() == "true"
     use_gpt = os.getenv("ANALYZE_PROFILES_WITH_GPT", "false").lower() == "true"
     gpt_key = os.getenv("OPENAI_API_KEY", "")
     gpt_org = os.getenv("CHAT_GPT_ORGANIZATION", "")
@@ -91,6 +92,9 @@ def check_general_vars():
         return False
     if not max_runtime or not 600 <= int(max_runtime) <= 1500:
         print("GET_COFOUNDER: Invalid max runtime.")
+        return False
+    if not search_after_limit:
+        print("GET_COFOUNDER: Search after weekly limit is invalid.")
         return False
     if use_gpt and (gpt_key == "" or gpt_org == "" or gpt_project_id == ""):
         print("GET_COFOUNDER: Invalid GPT params.")
@@ -120,11 +124,13 @@ def log_into_account(driver):
 
     my_profile = MyProfile(driver)
     hit_limit = my_profile.check_dashboard_weekly_limit_reached()
+    search_after_limit = os.getenv("SEARCH_WHEN_LIMIT_REACHED", "false").lower() == "true"
 
-    if not hit_limit: 
+    if hit_limit and not search_after_limit: 
         print("GET_COFOUNDER: Hit the weekly limit for cofounder matching.")
         log_message(True, None)
-    return hit_limit
+        return False
+    return True
 
 def find_cofounders(driver):
     """

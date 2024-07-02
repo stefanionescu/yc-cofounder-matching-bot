@@ -8,10 +8,10 @@ COPY . /yc-cofounder-matching-bot/
 
 # Install Python and Pip
 USER root
-RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y python-pip
 
 # Install Python dependencies
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Command to run on container start
-CMD ["python3", "get_cofounder.py"]
+CMD ["python", "get_cofounder.py"]

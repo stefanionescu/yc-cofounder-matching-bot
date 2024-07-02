@@ -32,6 +32,7 @@ class Scout:
         """ Initialize environment variables and set default values. """
         self.cities = os.getenv("YC_CITIES", "").split(";")
         self.city_to_return_to = os.getenv("CITY_TO_RETURN_TO", "")
+        self.search_after_limit_reached = os.getenv("SEARCH_WHEN_LIMIT_REACHED", "false").lower() == "true"
         self.bot_max_run_time = int(os.getenv("BOT_MAX_RUN_TIME", 600))
         self.contact_founders_flag = os.getenv("CONTACT_FOUNDERS", "false") == "true"
         self.max_founders_to_contact = int(os.getenv("MAX_FOUNDERS_TO_CONTACT", 1))
@@ -320,13 +321,30 @@ class Scout:
         """ Navigate and process profiles on the Discover page. """
         if not self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
             return False
+        
+        previous_profile_id = None
+        current_profile_id  = None
 
         while self.still_have_time() and self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL) and not self.hit_weekly_limit():
-            if not self.process_current_profile():
-                # TODO: check if the current profile ID in the URL is different than the previous one; if they are identical, we need to stop execution
-                continue  # Skip to next profile if current one is not processed
+            current_profile_id = self.get_current_profile_id()
+            if current_profile_id == previous_profile_id:
+                raise Exception("Could not navigate to the next founder profile.")
+
+            self.process_current_profile()
+            previous_profile_id = current_profile_id
             
         return True
+    
+    def get_current_profile_id(self):
+        """ Get the founder profile ID. """
+        if not self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
+            raise Exception("Cannot check the profile ID if not on the Discover page.")
+        
+        split_url = self.driver.current_url.split("/")
+        if len(split_url) != 6:
+             raise Exception("Invalid profile URL format.")
+        
+        return split_url[len(split_url) - 1]
 
     def process_current_profile(self):
         """ Process an individual founder's profile and determine actions based on profile data. """
@@ -364,13 +382,16 @@ class Scout:
 
     def default_profile_handling(self, interest_group):
         """ Handle profile based on the system settings without GPT analysis. """
-        if self.contact_founders_flag and self.contacted_founders < self.max_founders_to_contact:
+        if self.contact_founders_flag and self.contacted_founders < self.max_founders_to_contact and self.contact_when_searching_after_limit():
             print("SCOUT: Contacting the founder...")
             return self.contact_founder(interest_group)
         print("SCOUT: Saving this founder profile...")
         return self.save_founder()
 
     def hit_weekly_limit(self):
+        if self.search_after_limit_reached:
+            return False
+
         limit_paragraph = []
 
         if self.driver.current_url == CONSTANTS.STARTUP_SCHOOL_DASHBOARD_URL:
@@ -394,6 +415,19 @@ class Scout:
                 return True
         
         return False
+
+    def contact_when_searching_after_limit(self):
+        if self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
+            limit_paragraph = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH)
+
+            if len(limit_paragraph) != 1:
+                self.log_message(False, "Couldn't check if I hit the weekly limit.")
+                return False
+
+            if not limit_paragraph[0].is_displayed() or not (CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text):
+                return True
+        else:
+            return False
 
     def change_cities_and_search_profiles(self):
         """ Iterate through cities to search for cofounders. """

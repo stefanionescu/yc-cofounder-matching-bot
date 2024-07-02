@@ -89,6 +89,6 @@ class MyProfile():
         if len(weekly_limit_box) != 1: 
             return True
         if CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE in weekly_limit_box[0].text:
-            return False
+            return True
         
-        return True
+        return False
