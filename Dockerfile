@@ -6,12 +6,12 @@ WORKDIR /yc-cofounder-matching-bot
 # Copy the current directory contents into the container
 COPY . /yc-cofounder-matching-bot/
 
-# Install Python and Pip
+# Install Python 3 and Pip
 USER root
-RUN apt-get update && apt-get install -y python-pip
+RUN apt-get update && apt-get install -y python3 python3-pip
 
 # Install Python dependencies
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Command to run on container start
-CMD ["python", "get_cofounder.py"]
+CMD ["python3", "get_cofounder.py"]

@@ -9,6 +9,7 @@ from proxy.extension import proxies
 from utils.utils import Utils as utils
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
+from datetime import datetime, timedelta, timezone
 from email_logging.email_logging import EmailLogging
 from selenium.webdriver.chrome.options import Options
 
@@ -143,10 +144,38 @@ def log_message(hit_weekly_limit, bot_error):
     email_logging = EmailLogging() 
     email_logging.log_report_to_email(hit_weekly_limit, bot_error, None, None, None, None)
 
+def correct_execution_time():
+    # Get the target time from the environment variable
+    target_time_str = os.getenv('TARGET_TIME_UTC', '')
+    if not target_time_str or target_time_str == '':
+        return True
+
+    target_time = datetime.strptime(target_time_str, '%H:%M').time()
+
+    # Get the wiggle room from the environment variable (default to 0 if not set)
+    wiggle_room_minutes = int(os.getenv('TARGET_TIME_WIGGLE_ROOM', '0'))
+
+    # Get the current UTC time
+    current_time_utc = datetime.now(timezone.utc)
+
+    # Calculate the time window
+    start_time = (datetime.combine(current_time_utc.date(), target_time) - timedelta(minutes=wiggle_room_minutes)).time()
+    end_time = (datetime.combine(current_time_utc.date(), target_time) + timedelta(minutes=wiggle_room_minutes)).time()
+
+    # Check if the current time is within the wiggle room window
+    if start_time <= current_time_utc.time() <= end_time:
+        return True
+    
+    return False
+
 def main():
     """
     Main execution routine.
     """
+    if not correct_execution_time():
+        print("Cannot run at this time.")
+        return
+
     if not check_yc_creds():
         return
     
