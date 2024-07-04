@@ -41,6 +41,8 @@ pip<version> install -r requirements.txt
 
 You'll need to create a `.env` file and place it at the root of the directory. In it, you need to put the following variables:
 
+- `TARGET_TIME_UTC`: the UTC timestamp when the bot is supposed to execute
+- `TARGET_TIME_WIGGLE_ROOM`: the wiggle room (number of minutes) before and after the `TARGET_TIME_UTC` during which the bot can execute
 - `USE_PROXY`: whether to use a [SmartProxy proxy](https://smartproxy.com/) or not. Totally optional. Values are `true` or `false`
 - `SMART_PROXY_USERNAME`, `SMART_PROXY_PASSWORD`, `SMART_PROXY_ENDPOINT`, `SMART_PROXY_PORT`: you get all these params once you create a SmartProxy account and pick a Residential Proxy. Check this [video guide](https://smartproxy.com/blog/how-to-set-up-and-use-residential-proxies) for more information about Residential Proxies
 - `YC_USERNAME` and `YC_PASSWORD`: the username and password you use to log into YC Cofounder Matching
@@ -96,4 +98,26 @@ In order to run the bot with Docker, execute the following:
 ```
 docker build -t yc-cofounder-matching-bot .
 docker run -it yc-cofounder-matching-bot
+```
+
+If you want to go a step forward and deploy to production, you can do this easily with Heroku. Install the Heroku CLI and execute the following:
+
+```
+# Step 1: Login to Heroku
+heroku login
+
+# Step 2: Login to Heroku Container Registry
+heroku container:login
+
+# Step 3: Navigate to your project directory (replace with your actual directory)
+cd path/to/your/project
+
+# Step 4: Build your Docker image with the name yc-cofounder-matching-bot
+docker build -t registry.heroku.com/yc-cofounder-matching-bot/web .
+
+# Step 5: Push the Docker image to Heroku
+docker push registry.heroku.com/yc-cofounder-matching-bot/web
+
+# Step 6: Release the image
+heroku container:release web -a yc-cofounder-matching-bot
 ```

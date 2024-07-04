@@ -29,6 +29,8 @@ class SignIn():
         userid_field.send_keys(os.getenv("YC_USERNAME"))
         pass_field.send_keys(os.getenv("YC_PASSWORD"))
         sign_in_btn.click()
+        # Wait for random_long_sleep x 2 to make sure the bot lands on the Cofounder Matching Dashboard
+        utils.random_long_sleep()
         utils.random_long_sleep()
 
     def go_to_sign_in(self):
@@ -39,7 +41,7 @@ class SignIn():
             return False
 
         sign_in_button.click()
-        utils.random_short_sleep()
+        utils.random_normal_sleep()
         return True
 
     def find_element(self, by_method, identifier):
