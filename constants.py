@@ -41,6 +41,9 @@ SIGN_IN_PAGE_LOGIN_BUTTON = "div.actions button[type='submit']"
 # Page-Specific Query Parameters or Paths
 MY_PROFILE_PAGE_URL_PAGE_ONE = "?page=1"
 
+# Scraping Params
+CHROME_DRIVER_VERSION = 126
+
 # Text Constants for Validation and Errors
 FIX_ERRORS_STRING = "Please fix the errors below before continuing."
 COULD_NOT_FIND_CITY_STRING = "Could not identify this location"

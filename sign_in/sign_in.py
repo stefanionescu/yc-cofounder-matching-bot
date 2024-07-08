@@ -41,7 +41,7 @@ class SignIn():
             return False
 
         sign_in_button.click()
-        utils.random_normal_sleep()
+        utils.random_long_sleep()
         return True
 
     def find_element(self, by_method, identifier):

@@ -1,11 +1,10 @@
 import os
 from scout.scout import Scout
 import constants as CONSTANTS
-from selenium import webdriver
 from dotenv import load_dotenv
-import chromedriver_autoinstaller
 from sign_in.sign_in import SignIn
 from proxy.extension import proxies
+import undetected_chromedriver as uc
 from utils.utils import Utils as utils
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
@@ -17,11 +16,13 @@ def setup_chrome_driver():
     """
     Sets up and returns a Chrome WebDriver with configured options and potential proxy.
     """
-    chromedriver_autoinstaller.install()
+    uc.TARGET_VERSION = CONSTANTS.CHROME_DRIVER_VERSION
     chrome_options = Options()
+
     add_chrome_options(chrome_options)
     configure_proxy_if_needed(chrome_options)
-    driver = webdriver.Chrome(options=chrome_options)
+
+    driver = uc.Chrome(options=chrome_options)
     return driver
 
 def add_chrome_options(chrome_options):
@@ -188,7 +189,7 @@ def main():
         driver.maximize_window() 
         print("GET_COFOUNDER: Navigating to YC's website...")
         driver.get(CONSTANTS.BASE_URL)
-        utils.random_normal_sleep()
+        utils.random_long_sleep()
 
         print("GET_COFOUNDER: Logging in...")
         login_output = log_into_account(driver)
