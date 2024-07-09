@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 selenium/standalone-chrome:125.0
+FROM --platform=linux/amd64 selenium/standalone-chrome:126.0
 
 # Set the working directory
 WORKDIR /yc-cofounder-matching-bot
