@@ -172,9 +172,9 @@ def main():
     """
     Main execution routine.
     """
-    # if not correct_execution_time():
-    #     print("Cannot run at this time.")
-    #     return
+    if not correct_execution_time():
+        print("Cannot run at this time.")
+        return
 
     if not check_yc_creds():
         return
