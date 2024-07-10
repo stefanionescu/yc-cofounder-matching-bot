@@ -29,9 +29,9 @@ class SignIn():
         userid_field.send_keys(os.getenv("YC_USERNAME"))
         pass_field.send_keys(os.getenv("YC_PASSWORD"))
         sign_in_btn.click()
-        # Wait for random_long_sleep x 2 to make sure the bot lands on the Cofounder Matching Dashboard
+        # Wait for random_long_sleep + random_short_sleep to make sure the bot lands on the Cofounder Matching Dashboard
         utils.random_long_sleep()
-        utils.random_long_sleep()
+        utils.random_short_sleep()
 
     def go_to_sign_in(self):
         print("SIGN_IN: Going to the login page...")

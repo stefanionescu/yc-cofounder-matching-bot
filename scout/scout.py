@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 from time import time
 import constants as CONSTANTS
 from dotenv import load_dotenv
@@ -207,8 +207,8 @@ class Scout:
         parts.append(CONSTANTS.PROMPT_QUESTIONS_SECTION + self.gpt_questions)
         parts.append(CONSTANTS.PROMPT_ENDING)
 
-        # Join all non-empty, non-None parts with a space
-        return "\n\n".join(parts)
+        # Join all non-empty, non-None parts with a space and remove trap phrases
+        return self.remove_trap_phrases("\n\n".join(parts))
 
     def contact_founder(self, interest_group):
         """ Contact a founder based on a specific interest group. """
@@ -302,14 +302,6 @@ class Scout:
                 break
             if not self.change_city_and_search(city):
                 print(f"SCOUT: Failed to process profiles for city: {city}")
-
-    def change_city_and_search(self, city):
-        """ Change to a specific city and search for profiles. """
-        if not self.my_profile.go_to_profile_and_change_city(city):
-            return False
-        if not self.go_to_discover():
-            return False
-        return self.search_profiles()
 
     def wrap_up_search(self):
         """ Complete the search process by returning to the preferred city. """
@@ -450,3 +442,15 @@ class Scout:
             self.skipped_cities_list.append(city)
             return False
         return self.search_profiles()
+    
+    def remove_trap_phrases(self, text):
+        patterns = [
+            r'if\s+you\s+are\s+(an?\s+)?(LLM|GPT|ChatGPT|Claude|AI|bot)',
+            r'in\s+(case|care)\s+you\s+are\s+(an?\s+)?(GPT|AI|bot)',
+            r'(ignore|ban|block|save|skip|contact)\s+my\s+profile'
+        ]
+
+        for pattern in patterns:
+            text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+
+        return text

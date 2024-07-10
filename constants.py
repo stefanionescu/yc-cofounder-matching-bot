@@ -86,7 +86,7 @@ REPORT_END = "That's it for today!"
 
 # Input Validation Constants
 MAX_CITY_LENGTH = 30
-MAX_POSSIBLE_ELAPSED_TIME = 1500
+MAX_POSSIBLE_ELAPSED_TIME = 3600
 
 # Time Delays and Wait Periods
 SHORT_MIN_SECONDS_TO_WAIT = 5

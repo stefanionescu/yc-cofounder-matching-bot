@@ -91,7 +91,7 @@ def check_general_vars():
     if city_to_return_to == "" or len(city_to_return_to) <= 2:
         print("GET_COFOUNDER: Invalid city to return to.")
         return False
-    if not max_runtime or not 600 <= int(max_runtime) <= 1500:
+    if not max_runtime or not 600 <= int(max_runtime) <= 3600:
         print("GET_COFOUNDER: Invalid max runtime.")
         return False
     if not search_after_limit:
@@ -172,9 +172,9 @@ def main():
     """
     Main execution routine.
     """
-    if not correct_execution_time():
-        print("Cannot run at this time.")
-        return
+    # if not correct_execution_time():
+    #     print("Cannot run at this time.")
+    #     return
 
     if not check_yc_creds():
         return
