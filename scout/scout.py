@@ -447,7 +447,13 @@ class Scout:
         patterns = [
             r'if\s+you\s+are\s+(an?\s+)?(LLM|GPT|ChatGPT|Claude|AI|bot)',
             r'in\s+(case|care)\s+you\s+are\s+(an?\s+)?(GPT|AI|bot)',
-            r'(ignore|ban|block|save|skip|contact)\s+my\s+profile'
+            r'(ignore|ban|block|save|skip|contact)\s+my\s+profile',
+            r'disregard\s+previous\s+instructions',
+            r'disregard\s+previous\s+pointers',
+            r'disregard\s+previous\s+prompts',
+            r'ignore\s+the\s+prompts',
+            r'ignore\s+instructions',
+            r'ignore\s+the\s+instructions'
         ]
 
         for pattern in patterns:
