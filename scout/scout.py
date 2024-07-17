@@ -40,6 +40,7 @@ class Scout:
         self.gpt_organization = os.getenv("CHAT_GPT_ORGANIZATION", "")
         self.gpt_project = os.getenv("CHAT_GPT_PROJECT", "")
         self.skip_yc_alumni = os.getenv("SKIP_YC_ALUMNI", "false") == "true"
+        self.skip_founder_with_cofounder = os.getenv("SKIP_FOUNDER_WITH_EXISTING_COFOUNDER", "false") == "true"
         self.gpt_questions = os.getenv("CHAT_GPT_QUESTIONS", "")
         self.important_interests = [group.split(",") for group in os.getenv("IMPORTANT_SHARED_INTERESTS", "").split(";")]
         self.my_profile = MyProfile(self.driver)
@@ -93,6 +94,23 @@ class Scout:
             sys.exit(0)
         except Exception as e:
             print(f"SCOUT: Error checking YC alumni status: {e}")
+            self.log_message(None, e)
+            return False
+        
+    def founder_has_cofounder(self):
+        """ Check if the founder already has a cofounder. """
+        try:
+            # Directly search for the specific text or markers
+            has_cofounder_title = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_OWN_COFOUNDER)
+
+            if len(has_cofounder_title) == 1:
+                return True
+            
+            return False
+        except SystemError as e:
+            sys.exit(0)
+        except Exception as e:
+            print(f"SCOUT: Error checking if founder already has cofounder: {e}")
             self.log_message(None, e)
             return False
 
@@ -342,6 +360,10 @@ class Scout:
         """ Process an individual founder's profile and determine actions based on profile data. """
         if self.skip_yc_alumni and self.is_yc_alumn():
             print("SCOUT: Skipping the profile because it's from a YC alumn...")
+            return self.skip_founder()
+        
+        if self.skip_founder_with_cofounder and self.founder_has_cofounder():
+            print("SCOUT: Skipping the profile because the founder already has a cofounder...")
             return self.skip_founder()
 
         profile_info = self.get_profile_info()

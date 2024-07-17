@@ -6,7 +6,7 @@
 #          a message about floating farms to founders who are interested in hard tech but not in agriculture. It would be really weird
 FOUNDER_MESSAGE_ONE = """Hi! I'm also a founder and would like to connect.
 
-Let me know if you'd like to build spaceschips.
+Let me know if you'd like to build spaceships.
 
 See you soon,
 

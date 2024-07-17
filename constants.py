@@ -25,6 +25,7 @@ FOUNDER_EQUITY_EXPECTATIONS = "//span[text()='Equity expectations']/following-si
 FOUNDER_INTRO = "//span[text()='Intro']/following-sibling::div[1]"
 FOUNDER_LIFE_STORY = "//span[text()='Life Story']/following-sibling::div[1]"
 FOUNDER_FREE_TIME = "//span[text()='Free Time']/following-sibling::div[1]"
+FOUNDER_OWN_COFOUNDER = "//span[text()='About my current co-founder']"
 FOUNDER_OTHER_INFO = "//span[text()='Other']/following-sibling::div[1]"
 FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH = "//body//div[@class='navigation-parent']//div[@class='css-nzfpbh efk6n0y0']//div[@class='css-nzfpbh efk6n0y0']//p[1]"
 
