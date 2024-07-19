@@ -1,4 +1,6 @@
 import os
+import zipfile
+import tempfile
 from scout.scout import Scout
 import constants as CONSTANTS
 from dotenv import load_dotenv
@@ -10,19 +12,18 @@ from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
 from datetime import datetime, timedelta, timezone
 from email_logging.email_logging import EmailLogging
-from selenium.webdriver.chrome.options import Options
 
 def setup_chrome_driver():
     """
     Sets up and returns a Chrome WebDriver with configured options and potential proxy.
     """
     uc.TARGET_VERSION = CONSTANTS.CHROME_DRIVER_VERSION
-    chrome_options = Options()
+    chrome_options = uc.ChromeOptions()
 
     add_chrome_options(chrome_options)
     configure_proxy_if_needed(chrome_options)
 
-    driver = uc.Chrome(options=chrome_options)
+    driver = uc.Chrome(options=chrome_options, suppress_welcome=True)
     return driver
 
 def add_chrome_options(chrome_options):
@@ -41,12 +42,19 @@ def configure_proxy_if_needed(chrome_options):
     """
     Configures a proxy for Chrome if the relevant environment variable is set.
     """
+    temp_dir = None
     use_proxy = os.getenv('USE_PROXY', '').lower() == 'true'
     if use_proxy:
         proxy_details = get_proxy_details()
         if None not in proxy_details.values():
             proxy_extension = proxies(**proxy_details)
-            chrome_options.add_extension(proxy_extension)
+
+            # Create a temporary directory to extract the extension
+            temp_dir = tempfile.mkdtemp()
+            with zipfile.ZipFile(proxy_extension, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+
+            chrome_options.add_argument(f'--load-extension={temp_dir}')
             print("GET_COFOUNDER: Proxy setup complete.")
         else:
             log_message(None, "Incomplete proxy configuration.")
