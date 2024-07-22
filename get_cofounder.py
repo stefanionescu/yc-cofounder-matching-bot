@@ -65,10 +65,10 @@ def get_proxy_details():
     Retrieves proxy configuration details from environment variables.
     """
     return {
-        'username': os.getenv("SMART_PROXY_USERNAME"),
-        'password': os.getenv("SMART_PROXY_PASSWORD"),
-        'endpoint': os.getenv("SMART_PROXY_ENDPOINT"),
-        'port': os.getenv("SMART_PROXY_PORT")
+        'username': os.getenv("PROXY_USERNAME"),
+        'password': os.getenv("PROXY_PASSWORD"),
+        'endpoint': os.getenv("PROXY_ENDPOINT"),
+        'port': os.getenv("PROXY_PORT")
     }
 
 def check_yc_creds():

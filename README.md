@@ -15,8 +15,6 @@ This bot works best if you set up your Cofounder Matching profile in such a way 
 
 Moreover, the current version of the bot doesn't check whether a founder has a specific idea, has the same timing as you or if they fall within a specific age range. If you'd like any of these features to be added, let me know by [creating an Issue](https://github.com/stefanionescu/yc-cofounder-matching-bot/issues).
 
-Finally, the bot will not loop through profiles in case you've already contacted 20 potential cofounders in a particular week.
-
 ## Requirements
 
 Install [Python](https://www.python.org/downloads/) and [Docker](https://docs.docker.com/engine/install/) before you test the bot.
@@ -43,12 +41,13 @@ You'll need to create a `.env` file and place it at the root of the directory. I
 
 - `TARGET_TIME_UTC`: the UTC timestamp when the bot is supposed to execute
 - `TARGET_TIME_WIGGLE_ROOM`: the wiggle room (number of minutes) before and after the `TARGET_TIME_UTC` during which the bot can execute
-- `USE_PROXY`: whether to use a [SmartProxy proxy](https://smartproxy.com/) or not. Totally optional. Values are `true` or `false`
-- `SMART_PROXY_USERNAME`, `SMART_PROXY_PASSWORD`, `SMART_PROXY_ENDPOINT`, `SMART_PROXY_PORT`: you get all these params once you create a SmartProxy account and pick a Residential Proxy. Check this [video guide](https://smartproxy.com/blog/how-to-set-up-and-use-residential-proxies) for more information about Residential Proxies
+- `USE_PROXY`: whether to use a proxy or not. Totally optional. Values are `true` or `false`
+- `PROXY_USERNAME`, `PROXY_PASSWORD`, `PROXY_ENDPOINT`, `PROXY_PORT`: you get all these params once you create a proxy account with an compatible service (SmartProxy, BrightData, NetNut etc)
 - `YC_USERNAME` and `YC_PASSWORD`: the username and password you use to log into YC Cofounder Matching
 - `YC_CITIES`: a list of cities separated by semicolons. These are all the cities that the bot will loop through, from left to right, and search for cofounders. **Make sure to write each city name exactly like you see it on your Cofounder Matching profile section**. You can search for cities under My Profile > Basics > Location. Also, pro tip: you can omit this environment var and the bot will only search for founders in the current Location you set for your profile
 - `CITY_TO_RETURN_TO`: this is the city your profile will be set to after the bot finishes searching for cofounders
 - `BOT_MAX_RUN_TIME`: this is the max amount of time (in seconds) that the bot will search for. Set this to a value anywhere between `600` (10 minutes) and `3600` (1 hour)
+- `SEARCH_WHEN_LIMIT_REACHED`: `true` or `false`. Whether the bot should continue to search for cofounders and save their profiles after you've hit your weekly quota to contact people
 - `CONTACT_COFOUNDERS`: `true` or `false`. Determines whether the bot will send messages to cofounders that it deems as a good fit. If this is set to `false`, the bot will save promising profiles under Revisit Profiles > Saved Profiles so you can check them out later
 - `MAX_PROFILES_TO_CONTACT`: this is the max number of promising cofounders that the bot will contact in a single run. You can set this to a more conservative value (less than 20) in case you want to double-check profiles before you reach out. **NOTE** that if the bot finds a promising profile and it cannot contact founders anymore, it will save the profile under Revisit Profiles > Saved Profiles
 - `SKIP_YC_ALUMNI`: `true` or `false`. A flag that tells the bot whether it should skip founders who already went through YC
