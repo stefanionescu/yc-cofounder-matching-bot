@@ -1,6 +1,7 @@
 import os
 import zipfile
 import tempfile
+import platform
 from scout.scout import Scout
 import constants as CONSTANTS
 from dotenv import load_dotenv
@@ -13,17 +14,62 @@ from founder_messages import founder_messages
 from datetime import datetime, timedelta, timezone
 from email_logging.email_logging import EmailLogging
 
+def get_os_chrome_version(operating_system):
+    if operating_system == "macOS":
+        return CONSTANTS.MACOS_CHROME_VERSION
+    elif operating_system == "Windows":
+        return CONSTANTS.WINDOWS_CHROME_VERSION
+    else:  # Linux
+        return CONSTANTS.LINUX_CHROME_VERSION
+    
+def detect_operating_system():
+    system = platform.system().lower()
+    
+    if system == "darwin":
+        return "macOS"
+    
+    elif system == "linux":
+        return "Linux"
+    
+    elif system == "windows":
+        return "Windows"
+    
+    elif system == "":
+        # Some Linux distributions might return an empty string
+        # Check for common Linux-specific directories
+        if os.path.isdir("/etc/") and os.path.isdir("/proc/"):
+            return "Linux"
+        # Check for Windows-specific directory
+        elif os.path.isdir("C:\\Windows"):
+            return "Windows"
+    
+    # Additional check for Linux using os.uname()
+    try:
+        uname = os.uname()
+        if uname.sysname.lower() == "linux":
+            return "Linux"
+    except AttributeError:
+        # os.uname() is not available on Windows
+        pass
+    
+    # If all checks fail, return None
+    return None
+
 def setup_chrome_driver():
     """
     Sets up and returns a Chrome WebDriver with configured options and potential proxy.
     """
-    uc.TARGET_VERSION = CONSTANTS.CHROME_DRIVER_VERSION
+    operating_system = detect_operating_system()
+    if not operating_system or operating_system == "":
+        raise Exception("Cannot detect the OS.")
+
+    uc.TARGET_VERSION = get_os_chrome_version(operating_system)
     chrome_options = uc.ChromeOptions()
 
     add_chrome_options(chrome_options)
     configure_proxy_if_needed(chrome_options)
 
-    driver = uc.Chrome(options=chrome_options, suppress_welcome=True)
+    driver = uc.Chrome(version_main=CONSTANTS.CHROME_DRIVER_VERSION, options=chrome_options, suppress_welcome=True)
     return driver
 
 def add_chrome_options(chrome_options):
@@ -37,6 +83,12 @@ def add_chrome_options(chrome_options):
     chrome_options.add_argument('--enable-logging')
     chrome_options.add_argument('--v=1')
     chrome_options.add_argument('--log-level=0')
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--disable-browser-side-navigation")
+    chrome_options.add_argument('--no-first-run')
+    chrome_options.add_argument('--no-service-autorun')
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument('--disable-features=PrivacySandboxSettings4')
 
 def configure_proxy_if_needed(chrome_options):
     """
@@ -190,9 +242,11 @@ def main():
     if not check_general_vars():
         return
 
-    print("GET_COFOUNDER: Setting up the Chrome driver...")
-    driver = setup_chrome_driver()
+    driver = None
     try:
+        print("GET_COFOUNDER: Setting up the Chrome driver...")
+        driver = setup_chrome_driver()
+
         driver.maximize_window() 
         print("GET_COFOUNDER: Navigating to YC's website...")
         driver.get(CONSTANTS.BASE_URL)
@@ -211,7 +265,8 @@ def main():
         print(f"GET_COFOUNDER: An error occurred: {e}")
         log_message(None, str(e))
     finally:
-        driver.quit()
+        if driver:
+            driver.quit()
 
 if __name__ == '__main__':
     load_dotenv()

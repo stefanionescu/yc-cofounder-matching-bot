@@ -70,6 +70,10 @@ If you want the bot to message founders, create a file called `founder_messages.
 founder_messages = []
 ```
 
+### Chrome Versions
+
+You might need to adjust the Chrome version used by the `undetected_chromedriver`, depending on whether you run the bot locally or you update the Docker image you use. You can change Chrome versions by changing the values for `MACOS_CHROME_VERSION`, `WINDOWS_CHROME_VERSION` or `LINUX_CHROME_VERSION` inside `constants.py`.
+
 ### Founder Profile Data
 
 The bot always checks the `Our shared interests` section to determine if a cofounder is a potential fit. If you set `ANALYZE_PROFILES_WITH_GPT` to `true`, the bot will also use information from `Intro`, `Life Story`, `Free Time`, `Other`, `Impressive accomplishment`, `Equity expectations` and `Potential ideas` to check for cofounder compatibility.
@@ -82,13 +86,10 @@ The simplest way to run the bot is to execute the following:
 python<version> get_cofounder.py
 ```
 
-If you want to see the bot interact with the browser, comment the following lines from [`get_cofounder.py`](./get_cofounder.py):
+If you want to see the bot interact with the browser, comment the following line from [`get_cofounder.py`](./get_cofounder.py):
 
 ```
-chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--headless=new')
-chrome_options.add_argument('--disable-dev-shm-usage')
-chrome_options.add_argument('--disable-gpu')
 ```
 
 In order to run the bot with Docker, execute the following:

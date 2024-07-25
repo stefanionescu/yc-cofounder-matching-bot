@@ -44,6 +44,9 @@ MY_PROFILE_PAGE_URL_PAGE_ONE = "?page=1"
 
 # Scraping Params
 CHROME_DRIVER_VERSION = 126
+MACOS_CHROME_VERSION = "126.0.6478.183"
+WINDOWS_CHROME_VERSION = "126.0.6478.183"
+LINUX_CHROME_VERSION = "126.0.6478.114"
 
 # Text Constants for Validation and Errors
 FIX_ERRORS_STRING = "Please fix the errors below before continuing."
