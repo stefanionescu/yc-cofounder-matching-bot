@@ -73,9 +73,10 @@ class MyProfile():
     def navigate_to_profile(self):
         print("MY_PROFILE: Navigating to the profile section...")
         my_profile = self.driver.find_elements(By.XPATH, CONSTANTS.DASHBOARD_MY_ACCOUNT_MENU_OPTION)
+
         if len(my_profile) == 1:
             my_profile[0].click()
-            utils.random_normal_sleep()
+            utils.random_long_sleep()
             return self.driver.current_url.startswith(CONSTANTS.MY_PROFILE_URL)
         print("MY_PROFILE: My profile button is not found or multiple instances found.")
         return False

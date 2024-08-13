@@ -9,6 +9,7 @@ from sign_in.sign_in import SignIn
 from proxy.extension import proxies
 import undetected_chromedriver as uc
 from utils.utils import Utils as utils
+from utils.navigation import Navigation
 from my_profile.my_profile import MyProfile
 from founder_messages import founder_messages
 from datetime import datetime, timedelta, timezone
@@ -247,10 +248,16 @@ def main():
         print("GET_COFOUNDER: Setting up the Chrome driver...")
         driver = setup_chrome_driver()
 
+        driver.set_page_load_timeout(CONSTANTS.PAGE_LOAD_TIMEOUT)
         driver.maximize_window() 
+
         print("GET_COFOUNDER: Navigating to YC's website...")
-        driver.get(CONSTANTS.BASE_URL)
-        utils.random_long_sleep()
+        navigation = Navigation()
+        if navigation.navigate_with_refresh(driver, CONSTANTS.BASE_URL):
+            utils.random_long_sleep()
+        else:
+            log_message(None, "Could not navigate to the YC Cofounder landing page.")
+            return
 
         print("GET_COFOUNDER: Logging in...")
         login_output = log_into_account(driver)

@@ -272,6 +272,7 @@ class Scout:
     def save_founder(self):
         """ Save the current founder profile to favorites. """
         try:
+            utils.random_short_sleep()
             save_button = self.driver.find_elements(By.XPATH, CONSTANTS.FOUNDER_SAVE_TO_FAVORITES)
             if len(save_button) != 3:
                 self.log_message(False, "Couldn't save founder profile.")
