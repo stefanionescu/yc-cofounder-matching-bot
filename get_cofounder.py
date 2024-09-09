@@ -135,7 +135,6 @@ def check_general_vars():
     Validate general bot settings from environment variables.
     """
     max_runtime = os.getenv("BOT_MAX_RUN_TIME", 1)
-    search_after_limit = os.getenv("SEARCH_WHEN_LIMIT_REACHED", "false").lower() == "true"
     use_gpt = os.getenv("ANALYZE_PROFILES_WITH_GPT", "false").lower() == "true"
     gpt_key = os.getenv("OPENAI_API_KEY", "")
     gpt_org = os.getenv("CHAT_GPT_ORGANIZATION", "")
@@ -154,9 +153,6 @@ def check_general_vars():
         return False
     if not max_runtime or not 600 <= int(max_runtime) <= 3600:
         print("GET_COFOUNDER: Invalid max runtime.")
-        return False
-    if not search_after_limit:
-        print("GET_COFOUNDER: Search after weekly limit is invalid.")
         return False
     if use_gpt and (gpt_key == "" or gpt_org == "" or gpt_project_id == ""):
         print("GET_COFOUNDER: Invalid GPT params.")
@@ -233,9 +229,9 @@ def main():
     """
     Main execution routine.
     """
-    if not correct_execution_time():
-        print("Cannot run at this time.")
-        return
+    # if not correct_execution_time():
+    #     print("Cannot run at this time.")
+    #     return
 
     if not check_yc_creds():
         return
