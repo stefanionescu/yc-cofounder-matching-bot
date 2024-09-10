@@ -413,7 +413,7 @@ class Scout:
                 self.log_message(False, "Couldn't check if I hit the weekly limit.")
                 return True
             
-            if limit_paragraph[0].is_displayed() and CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text and self.search_after_limit_reached == True:
+            if limit_paragraph[0].is_displayed() and CONSTANTS.DASHBOARD_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text and self.search_after_limit_reached == False:
                 return True
 
         elif self.driver.current_url.startswith(CONSTANTS.DISCOVER_PROFILES_URL):
@@ -423,7 +423,7 @@ class Scout:
                 self.log_message(False, "Couldn't check if I hit the weekly limit.")
                 return True
 
-            if limit_paragraph[0].is_displayed() and CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text and self.search_after_limit_reached == True:
+            if limit_paragraph[0].is_displayed() and CONSTANTS.FOUNDER_PROFILE_WEEKLY_LIMIT_NOTICE in limit_paragraph[0].text and self.search_after_limit_reached == False:
                 return True
         
         return False
