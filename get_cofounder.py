@@ -70,7 +70,7 @@ def setup_chrome_driver():
     add_chrome_options(chrome_options)
     configure_proxy_if_needed(chrome_options)
 
-    driver = uc.Chrome(version_main=CONSTANTS.CHROME_DRIVER_VERSION, options=chrome_options, suppress_welcome=True)
+    driver = uc.Chrome(version_main=int(uc.TARGET_VERSION.split(".")[0]), options=chrome_options, suppress_welcome=True)
     return driver
 
 def add_chrome_options(chrome_options):
@@ -184,7 +184,7 @@ def log_into_account(driver):
     hit_limit = my_profile.check_dashboard_weekly_limit_reached()
     search_after_limit = os.getenv("SEARCH_WHEN_LIMIT_REACHED", "false").lower() == "true"
 
-    if hit_limit and not search_after_limit: 
+    if hit_limit and search_after_limit == False: 
         print("GET_COFOUNDER: Hit the weekly limit for cofounder matching.")
         log_message(True, None)
         return False

@@ -30,7 +30,7 @@ FOUNDER_OTHER_INFO = "//span[text()='Other']/following-sibling::div[1]"
 FOUNDER_PROFILE_WEEKLY_LIMIT_PARAGRAPH = "//body//div[@class='navigation-parent']//div[@class='css-nzfpbh efk6n0y0']//div[@class='css-nzfpbh efk6n0y0']//p[1]"
 
 # CSS Paths for Text Element
-DASHBOARD_LIMIT_NOTICE_BOX = "div[class='css-1czqf2r e13d1soq2'] div:nth-child(1)"
+DASHBOARD_LIMIT_NOTICE_BOX = "//div[contains(@class, 'css-1czqf2r')]/div"
 FOUNDER_POTENTIAL_IDEAS = "body > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1)"
 
 # IDs and Class Names for Form Elements
@@ -43,8 +43,7 @@ SIGN_IN_PAGE_LOGIN_BUTTON = "div.actions button[type='submit']"
 MY_PROFILE_PAGE_URL_PAGE_ONE = "?page=1"
 
 # Scraping Params
-CHROME_DRIVER_VERSION = 126
-MACOS_CHROME_VERSION = "126.0.6478.183"
+MACOS_CHROME_VERSION = "128.0.6613.119"
 WINDOWS_CHROME_VERSION = "126.0.6478.183"
 LINUX_CHROME_VERSION = "126.0.6478.114"
 

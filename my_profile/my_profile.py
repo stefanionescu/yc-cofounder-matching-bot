@@ -85,7 +85,7 @@ class MyProfile():
         if self.driver.current_url != CONSTANTS.STARTUP_SCHOOL_DASHBOARD_URL:
             return True
 
-        weekly_limit_box = self.driver.find_elements(By.CSS_SELECTOR, CONSTANTS.DASHBOARD_LIMIT_NOTICE_BOX)
+        weekly_limit_box = self.driver.find_elements(By.XPATH, CONSTANTS.DASHBOARD_LIMIT_NOTICE_BOX)
 
         if len(weekly_limit_box) != 1: 
             return True
