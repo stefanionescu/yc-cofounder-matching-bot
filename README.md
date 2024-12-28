@@ -11,7 +11,7 @@ This repo hosts a Selenium bot that can help you find, save and contact potentia
 
 ## Caveats
 
-This bot works best if you set up your Cofounder Matching profile in such a way that it already filters for the right candidates. For example, the bot doesn't check (by default) if a founder is technical or not. You can specify that requirement on your profile or use the ChatGPT integration to filter for tech cofounders.
+This bot works best if you set up your Cofounder Matching profile in such a way that it already filters for the right candidates. For example, the bot doesn't check by default if a founder is technical or not. You can specify that requirement on your profile or use the ChatGPT integration to filter for tech cofounders.
 
 Moreover, the current version of the bot doesn't check whether a founder has a specific idea, has the same timing as you or if they fall within a specific age range. If you'd like any of these features to be added, let me know by [creating an Issue](https://github.com/stefanionescu/yc-cofounder-matching-bot/issues).
 
