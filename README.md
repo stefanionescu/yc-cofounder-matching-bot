@@ -1,4 +1,9 @@
-# YC Cofounder Matching Bot
+# (Deprecated) YC Cofounder Matching Bot
+
+**NOTE**: This repo doesn't work anymore due to enhanced security on the YC Cofounder Matching website. You'll most likely need to do one of the following in order to make it work again:
+
+- Find a clever way around Cloudflare security
+- Log in manually during the first bot run, save the Chrome profile data in an AWS bucket and reuse that profile's info in future runs
 
 This repo hosts a Selenium bot that can help you find, save and contact potential cofounders on [YC Cofounder Matching](https://www.ycombinator.com/cofounder-matching).
 
